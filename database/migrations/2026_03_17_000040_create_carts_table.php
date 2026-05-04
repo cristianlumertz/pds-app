@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->string('status')->default('open');
-            $table->timestamp('expires_at')->nullable();
+            $table->decimal('total_price', 10, 2)->default(0);
+            $table->integer('item_count')->default(0);
             $table->timestamps();
 
-            $table->index(['user_id', 'status']);
+            $table->index('user_id');
         });
     }
 

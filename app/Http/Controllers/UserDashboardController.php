@@ -13,7 +13,7 @@ class UserDashboardController extends Controller
 
         $stats = [
             'orders_count' => $user->orders()->count(),
-            'open_carts_count' => $user->carts()->where('status', 'open')->count(),
+            'carts_count' => $user->carts()->count(),
         ];
 
         $latestOrders = $user->orders()

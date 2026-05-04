@@ -16,13 +16,11 @@ class Order extends Model
      */
     protected $fillable = [
         'user_id',
+        'address_id',
         'status',
         'payment_method',
-        'subtotal',
-        'shipping_amount',
+        'trackingNumber',
         'total_amount',
-        'paid_at',
-        'placed_at',
     ];
 
     /**
@@ -31,11 +29,7 @@ class Order extends Model
     protected function casts(): array
     {
         return [
-            'subtotal' => 'decimal:2',
-            'shipping_amount' => 'decimal:2',
             'total_amount' => 'decimal:2',
-            'paid_at' => 'datetime',
-            'placed_at' => 'datetime',
         ];
     }
 

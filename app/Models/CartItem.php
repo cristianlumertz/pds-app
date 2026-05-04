@@ -17,7 +17,7 @@ class CartItem extends Model
         'cart_id',
         'product_id',
         'quantity',
-        'unit_price',
+        'price',
     ];
 
     /**
@@ -26,7 +26,7 @@ class CartItem extends Model
     protected function casts(): array
     {
         return [
-            'unit_price' => 'decimal:2',
+            'price' => 'decimal:2',
         ];
     }
 

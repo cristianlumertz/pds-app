@@ -16,11 +16,11 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->text('description')->nullable();
+            $table->text('description');
             $table->string('sku')->unique();
             $table->decimal('price', 10, 2);
             $table->unsignedInteger('stock')->default(0);
-            $table->boolean('is_active')->default(true);
+            $table->tinyInteger('is_active')->default(1);
             $table->string('image_url')->nullable();
             $table->timestamps();
 

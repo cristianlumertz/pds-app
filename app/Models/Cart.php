@@ -16,8 +16,8 @@ class Cart extends Model
      */
     protected $fillable = [
         'user_id',
-        'status',
-        'expires_at',
+        'total_price',
+        'item_count',
     ];
 
     /**
@@ -26,7 +26,8 @@ class Cart extends Model
     protected function casts(): array
     {
         return [
-            'expires_at' => 'datetime',
+            'total_price' => 'decimal:2',
+            'item_count' => 'integer',
         ];
     }
 

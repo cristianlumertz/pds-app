@@ -11,8 +11,8 @@
                 <p class="mt-2 text-3xl font-black text-slate-900">{{ $stats['orders_count'] }}</p>
             </article>
             <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Carrinhos abertos</p>
-                <p class="mt-2 text-3xl font-black text-slate-900">{{ $stats['open_carts_count'] }}</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Carrinhos</p>
+                <p class="mt-2 text-3xl font-black text-slate-900">{{ $stats['carts_count'] }}</p>
             </article>
         </div>
     </section>
