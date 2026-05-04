@@ -15,7 +15,6 @@
     <body class="min-h-screen bg-[#F1EFE8] text-[#3D3D3A] antialiased">
         @php
             $user = auth()->user();
-            $cartCount = $user ? (int) ($user->carts()->latest('id')->value('item_count') ?? 0) : 0;
             $logoFile = public_path('images/logo-construcerto.png');
             $productsRoute = $user && $user->is_admin ? route('admin.products.index') : route('store.products');
         @endphp
@@ -49,12 +48,7 @@
                     <a href="{{ route('categories.index') }}" class="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-500">
                         Categorias
                     </a>
-                    <span class="inline-flex items-center gap-2 rounded-full bg-[#1D9E75]/10 px-3 py-1.5 text-xs font-bold text-[#1D9E75]">
-                        Carrinho
-                        <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1D9E75] px-1.5 text-[11px] text-white">
-                            {{ $cartCount }}
-                        </span>
-                    </span>
+                    <livewire:cart-icon />
 
                     @auth
                         <a href="{{ auth()->user()->is_admin ? route('admin.dashboard') : route('user.dashboard') }}" class="rounded-full bg-[#185FA5] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#174f88]">

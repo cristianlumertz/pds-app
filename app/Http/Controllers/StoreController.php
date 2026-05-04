@@ -12,7 +12,7 @@ class StoreController extends Controller
     public function home(): View
     {
         $featuredProducts = Product::query()
-            ->with('category')
+            ->with(['category', 'productImages'])
             ->where('is_active', true)
             ->latest()
             ->take(8)
@@ -66,7 +66,10 @@ class StoreController extends Controller
     {
         abort_unless($product->is_active, 404);
 
+        $product->load(['category', 'productImages']);
+
         $relatedProducts = Product::query()
+            ->with(['category', 'productImages'])
             ->where('is_active', true)
             ->where('category_id', $product->category_id)
             ->whereKeyNot($product->id)

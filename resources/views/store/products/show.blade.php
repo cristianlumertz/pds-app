@@ -42,6 +42,17 @@
             </div>
 
             <p class="mt-4 text-xs text-slate-500">SKU: {{ $product->sku }}</p>
+
+            <div class="mt-6">
+                @if($product->isInStock())
+                    <livewire:add-to-cart :product-id="$product->id" :initial-quantity="1" />
+                @else
+                    <p class="rounded-xl border border-[#BA7517]/30 bg-[#BA7517]/10 px-4 py-3 text-sm font-semibold text-[#BA7517]">
+                        Produto sem estoque no momento.
+                    </p>
+                @endif
+            </div>
+
             <a href="{{ route('store.products') }}" class="mt-6 inline-flex rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-500 hover:text-slate-900">
                 Voltar ao catalogo
             </a>
