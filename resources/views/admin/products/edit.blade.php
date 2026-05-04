@@ -4,7 +4,7 @@
     <section class="mx-auto w-full max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h1 class="text-2xl font-black text-slate-900">Editar produto</h1>
 
-        <form method="POST" action="{{ route('admin.products.update', $product) }}" class="mt-6 grid gap-4 md:grid-cols-2">
+        <form method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data" class="mt-6 grid gap-4 md:grid-cols-2">
             @csrf
             @method('PUT')
 
@@ -67,6 +67,32 @@
                     <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
                 @enderror
             </div>
+
+            <div class="md:col-span-2">
+                <label for="images" class="text-sm font-semibold text-slate-700">Adicionar novas imagens</label>
+                <input id="images" name="images[]" type="file" accept="image/*" multiple class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <p class="mt-1 text-xs text-slate-500">As novas imagens entram no final da galeria seguindo o campo `order`.</p>
+                @error('images')
+                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                @enderror
+                @error('images.*')
+                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            @if($product->productImages->isNotEmpty())
+                <div class="md:col-span-2">
+                    <p class="text-sm font-semibold text-slate-700">Galeria atual</p>
+                    <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                        @foreach($product->productImages as $image)
+                            <article class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                                <img src="{{ $image->url }}" alt="{{ $image->alt_text ?: $product->name }}" class="h-28 w-full object-cover">
+                                <p class="px-2 py-1 text-xs text-slate-600">Ordem: {{ $image->order }}</p>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             <div class="md:col-span-2">
                 <label for="description" class="text-sm font-semibold text-slate-700">Descricao</label>

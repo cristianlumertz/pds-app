@@ -11,6 +11,16 @@ class Order extends Model
 {
     use HasFactory;
 
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_PAID = 'paid';
+
+    public const STATUS_SHIPPED = 'shipped';
+
+    public const STATUS_DELIVERED = 'delivered';
+
+    public const STATUS_CANCELLED = 'cancelled';
+
     /**
      * @var list<string>
      */
@@ -38,8 +48,34 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class);
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function getStatus(): string
+    {
+        return ucfirst((string) $this->status);
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return in_array((string) $this->status, [self::STATUS_PENDING, self::STATUS_PAID], true);
+    }
+
+    public function markAsShipped(): void
+    {
+        if ((string) $this->status === self::STATUS_SHIPPED) {
+            return;
+        }
+
+        $this->forceFill([
+            'status' => self::STATUS_SHIPPED,
+        ])->save();
     }
 }

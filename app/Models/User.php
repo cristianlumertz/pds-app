@@ -56,8 +56,23 @@ class User extends Authenticatable
         return $this->hasMany(Cart::class);
     }
 
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function getFullName(): string
+    {
+        return (string) $this->name;
+    }
+
+    public function hasOrders(): bool
+    {
+        return $this->orders()->exists();
     }
 }

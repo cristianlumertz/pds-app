@@ -1,8 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $gallery = $product->productImages;
+        $featuredImage = $gallery->first()?->url ?? $product->image_url;
+    @endphp
+
     <section class="grid gap-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:grid-cols-2">
-        <div class="aspect-square rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100"></div>
+        <div>
+            @if($featuredImage)
+                <img src="{{ $featuredImage }}" alt="{{ $product->name }}" class="aspect-square w-full rounded-2xl object-cover">
+            @else
+                <div class="aspect-square rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100"></div>
+            @endif
+
+            @if($gallery->isNotEmpty())
+                <div class="mt-3 grid grid-cols-4 gap-2">
+                    @foreach($gallery as $image)
+                        <img
+                            src="{{ $image->url }}"
+                            alt="{{ $image->alt_text ?: $product->name }}"
+                            class="aspect-square rounded-lg border border-slate-200 object-cover"
+                        >
+                    @endforeach
+                </div>
+            @endif
+        </div>
 
         <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $product->category->name ?? 'Sem categoria' }}</p>
@@ -29,8 +52,15 @@
         <h2 class="text-xl font-black text-slate-900">Relacionados</h2>
         <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             @forelse($relatedProducts as $item)
+                @php
+                    $relatedImage = $item->primaryImageUrl();
+                @endphp
                 <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <div class="aspect-square rounded-xl bg-gradient-to-br from-amber-100 to-orange-100"></div>
+                    @if($relatedImage)
+                        <img src="{{ $relatedImage }}" alt="{{ $item->name }}" class="aspect-square w-full rounded-xl object-cover">
+                    @else
+                        <div class="aspect-square rounded-xl bg-gradient-to-br from-amber-100 to-orange-100"></div>
+                    @endif
                     <h3 class="mt-3 text-sm font-bold text-slate-900">{{ $item->name }}</h3>
                     <p class="mt-1 text-sm font-black text-amber-700">R$ {{ number_format((float) $item->price, 2, ',', '.') }}</p>
                     <a href="{{ route('store.products.show', $item) }}" class="mt-3 inline-flex text-sm font-semibold text-slate-700 hover:text-slate-900">

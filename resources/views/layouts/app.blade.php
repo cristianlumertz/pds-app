@@ -5,32 +5,99 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'ShopLaravel') }}</title>
 
-        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800,900&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+    <body class="min-h-screen bg-[#F1EFE8] text-[#3D3D3A] antialiased">
+        @php
+            $user = auth()->user();
+            $cartCount = $user ? (int) ($user->carts()->latest('id')->value('item_count') ?? 0) : 0;
+            $logoFile = public_path('images/logo-construcerto.png');
+        @endphp
 
-            <!-- Page Heading -->
+        <header class="border-b border-slate-200 bg-white/90 backdrop-blur">
+            <div class="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+                <a href="{{ route('store.home') }}" class="shrink-0">
+                    @if(file_exists($logoFile))
+                        <img src="{{ asset('images/logo-construcerto.png') }}" alt="ConstruCerto" class="h-11 w-auto">
+                    @else
+                        <span class="text-lg font-black tracking-tight text-[#185FA5]">ConstruCerto</span>
+                    @endif
+                </a>
+
+                <form method="GET" action="{{ route('store.products') }}" class="hidden flex-1 md:block">
+                    <label for="top-search" class="sr-only">Buscar produtos</label>
+                    <input
+                        id="top-search"
+                        name="q"
+                        value="{{ request('q') }}"
+                        placeholder="Buscar cimento, furadeira, tinta..."
+                        class="w-full rounded-full border border-slate-300 bg-[#F8F6EF] px-4 py-2 text-sm outline-none transition focus:border-[#185FA5] focus:ring-2 focus:ring-[#185FA5]/20"
+                    >
+                </form>
+
+                <div class="ml-auto flex items-center gap-2">
+                    <a href="{{ route('store.products') }}" class="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-500">
+                        Produtos
+                    </a>
+                    <a href="{{ route('categories.index') }}" class="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-500">
+                        Categorias
+                    </a>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-[#1D9E75]/10 px-3 py-1.5 text-xs font-bold text-[#1D9E75]">
+                        Carrinho
+                        <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1D9E75] px-1.5 text-[11px] text-white">
+                            {{ $cartCount }}
+                        </span>
+                    </span>
+
+                    @auth
+                        <a href="{{ auth()->user()->is_admin ? route('admin.dashboard') : route('user.dashboard') }}" class="rounded-full bg-[#185FA5] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#174f88]">
+                            Perfil
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="rounded-full bg-[#185FA5] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#174f88]">
+                            Entrar
+                        </a>
+                    @endauth
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 px-4 py-2 md:hidden">
+                <form method="GET" action="{{ route('store.products') }}">
+                    <label for="top-search-mobile" class="sr-only">Buscar produtos</label>
+                    <input
+                        id="top-search-mobile"
+                        name="q"
+                        value="{{ request('q') }}"
+                        placeholder="Buscar produtos..."
+                        class="w-full rounded-full border border-slate-300 bg-[#F8F6EF] px-4 py-2 text-sm outline-none transition focus:border-[#185FA5] focus:ring-2 focus:ring-[#185FA5]/20"
+                    >
+                </form>
+            </div>
+        </header>
+
+        <main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            @if(session('status'))
+                <div class="mb-4 rounded-xl border border-[#1D9E75]/20 bg-[#1D9E75]/10 px-4 py-3 text-sm font-semibold text-[#1D9E75]">
+                    {{ session('status') }}
+                </div>
+            @endif
+
             @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
+                <div class="mb-4 rounded-xl bg-white p-4 shadow-sm">
+                    {{ $header }}
+                </div>
             @endisset
 
-            <!-- Page Content -->
-            <main>
+            @hasSection('content')
+                @yield('content')
+            @elseif (isset($slot))
                 {{ $slot }}
-            </main>
-        </div>
+            @endif
+        </main>
     </body>
 </html>
