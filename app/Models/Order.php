@@ -13,7 +13,7 @@ class Order extends Model
 
     public const STATUS_PENDING = 'pending';
 
-    public const STATUS_PAID = 'paid';
+    public const STATUS_PROCESSING = 'processing';
 
     public const STATUS_SHIPPED = 'shipped';
 
@@ -29,7 +29,7 @@ class Order extends Model
         'address_id',
         'status',
         'payment_method',
-        'trackingNumber',
+        'tracking_number',
         'total_amount',
     ];
 
@@ -65,10 +65,10 @@ class Order extends Model
 
     public function canBeCancelled(): bool
     {
-        return in_array((string) $this->status, [self::STATUS_PENDING, self::STATUS_PAID], true);
+        return in_array((string) $this->status, [self::STATUS_PENDING, self::STATUS_PROCESSING], true);
     }
 
-    public function markAsShipped(): void
+    public function markAsShipped(string $trackingNumber = ''): void
     {
         if ((string) $this->status === self::STATUS_SHIPPED) {
             return;
@@ -76,6 +76,7 @@ class Order extends Model
 
         $this->forceFill([
             'status' => self::STATUS_SHIPPED,
+            'tracking_number' => $trackingNumber,
         ])->save();
     }
 }

@@ -1,0 +1,5 @@
+[C001] Inicializar projeto Laravel + Livewire + Breeze
+[C002] Criar migrations base
+[C003] Criar migrations de domínio
+[C004] Implementar models das 9 entidades
+[C015] Implementar seeders iniciais

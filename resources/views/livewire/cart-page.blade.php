@@ -34,7 +34,7 @@
                             </p>
                         </div>
 
-                        <div class="flex items-end gap-2">
+                        <div class="flex w-full flex-wrap items-end gap-2 sm:w-auto sm:flex-nowrap">
                             <button
                                 type="button"
                                 wire:click="decrease({{ $item->id }})"
@@ -70,7 +70,7 @@
                             <button
                                 type="button"
                                 wire:click="removeItem({{ $item->id }})"
-                                class="rounded-xl border border-[#993C1D] px-3 py-2 text-sm font-semibold text-[#993C1D] hover:bg-[#993C1D]/10"
+                                class="w-full rounded-xl border border-[#993C1D] px-3 py-2 text-sm font-semibold text-[#993C1D] hover:bg-[#993C1D]/10 sm:w-auto"
                             >
                                 Remover
                             </button>

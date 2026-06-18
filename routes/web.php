@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StoreController;
@@ -25,6 +29,26 @@ Route::middleware('auth')->group(function () {
     Route::get('/minha-conta', UserDashboardController::class)->name('user.dashboard');
     Route::get('/carrinho', [CartController::class, 'index'])->name('cart.index');
 
+    // Endereços do cliente
+    Route::get('/meus-enderecos', [AddressController::class, 'index'])->name('addresses.index');
+    Route::post('/meus-enderecos', [AddressController::class, 'store'])->name('addresses.store');
+    Route::put('/meus-enderecos/{address}', [AddressController::class, 'update'])->name('addresses.update');
+    Route::delete('/meus-enderecos/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+
+    // Checkout
+    Route::get('/checkout', [CheckoutController::class, 'step1'])->name('checkout.step1');
+    Route::post('/checkout/step1', [CheckoutController::class, 'saveStep1'])->name('checkout.save-step1');
+    Route::get('/checkout/pagamento', [CheckoutController::class, 'step2'])->name('checkout.step2');
+    Route::post('/checkout/step2', [CheckoutController::class, 'saveStep2'])->name('checkout.save-step2');
+    Route::get('/checkout/revisao', [CheckoutController::class, 'step3'])->name('checkout.step3');
+    Route::post('/checkout/confirmar', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/sucesso/{order}', [CheckoutController::class, 'sucesso'])->name('checkout.sucesso');
+
+    // Pedidos do cliente
+    Route::get('/meus-pedidos', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/meus-pedidos/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/meus-pedidos/{order}/cancelar', [OrderController::class, 'cancel'])->name('orders.cancel');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -37,6 +61,9 @@ Route::prefix('admin')
         Route::get('/', AdminDashboardController::class)->name('dashboard');
         Route::resource('categories', AdminCategoryController::class)->except('show');
         Route::resource('products', AdminProductController::class)->except('show');
+        Route::resource('pedidos', AdminOrderController::class)
+            ->parameters(['pedidos' => 'order'])
+            ->only(['index', 'show', 'update']);
     });
 
 require __DIR__.'/auth.php';

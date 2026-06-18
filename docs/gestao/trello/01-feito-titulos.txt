@@ -1,0 +1,17 @@
+[C001] Inicializar projeto Laravel + Livewire + Breeze
+[C002] Criar migrations base
+[C003] Criar migrations de domínio
+[C004] Implementar models das 9 entidades
+[C005] Implementar middleware admin
+[C006] Implementar catálogo público
+[C007] Implementar ProductSearch Livewire
+[C008] Implementar ProductFilter Livewire
+[C009] Implementar carrinho reativo Livewire
+[C010] Implementar CartService com transações
+[C011] Implementar checkout etapa 1 endereço
+[C012] Implementar checkout etapa 2 pagamento
+[C013] Implementar CRUD admin de categorias
+[C014] Implementar CRUD admin de produtos
+[C015] Implementar seeders iniciais
+[C016] Implementar testes auth perfil carrinho
+[C017] Executar suíte de testes atual

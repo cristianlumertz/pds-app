@@ -14,19 +14,39 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             [
-                'name' => 'Eletronicos',
-                'slug' => 'eletronicos',
-                'description' => 'Dispositivos e acessorios para uso diario.',
+                'name' => 'Ferramentas',
+                'slug' => 'ferramentas',
+                'description' => 'Ferramentas manuais e elétricas para obra',
             ],
             [
-                'name' => 'Casa e Decoracao',
-                'slug' => 'casa-e-decoracao',
-                'description' => 'Itens para conforto e estilo do ambiente.',
+                'name' => 'Elétrica',
+                'slug' => 'eletrica',
+                'description' => 'Fios, disjuntores, tomadas e material elétrico',
             ],
             [
-                'name' => 'Esporte',
-                'slug' => 'esporte',
-                'description' => 'Produtos para treino, saude e desempenho.',
+                'name' => 'Hidráulica',
+                'slug' => 'hidraulica',
+                'description' => 'Tubos, conexões, torneiras e material hidráulico',
+            ],
+            [
+                'name' => 'Materiais Básicos',
+                'slug' => 'materiais-basicos',
+                'description' => 'Cimento, areia, tijolo, argamassa e agregados',
+            ],
+            [
+                'name' => 'Tintas e Acabamentos',
+                'slug' => 'tintas-e-acabamentos',
+                'description' => 'Tintas, vernizes, massa corrida e textura',
+            ],
+            [
+                'name' => 'Segurança',
+                'slug' => 'seguranca',
+                'description' => 'EPIs, capacetes, luvas e equipamentos de proteção',
+            ],
+            [
+                'name' => 'Fixação',
+                'slug' => 'fixacao',
+                'description' => 'Parafusos, buchas, pregos e produtos de fixação',
             ],
         ];
 

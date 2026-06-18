@@ -24,7 +24,9 @@ class AddressController extends Controller
             ->latest()
             ->get();
 
-        return view('store.addresses.index', compact('addresses'));
+        $defaultAddress = $addresses->firstWhere('is_default', true);
+
+        return view('store.checkout.step-1-address', compact('addresses', 'defaultAddress'));
     }
 
     public function store(AddressRequest $request): RedirectResponse
@@ -53,7 +55,7 @@ class AddressController extends Controller
         });
 
         return redirect()
-            ->route('addresses.index')
+            ->route('checkout.step1')
             ->with('status', 'Endereço cadastrado com sucesso.');
     }
 
@@ -84,7 +86,7 @@ class AddressController extends Controller
         });
 
         return redirect()
-            ->route('addresses.index')
+            ->route('checkout.step1')
             ->with('status', 'Endereço atualizado com sucesso.');
     }
 
@@ -106,7 +108,7 @@ class AddressController extends Controller
         });
 
         return redirect()
-            ->route('addresses.index')
+            ->route('checkout.step1')
             ->with('status', 'Endereço removido com sucesso.');
     }
 }

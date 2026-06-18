@@ -1,0 +1,53 @@
+Card ID,Title,List,Status,Priority,Sprint,Area,Description
+C001,Inicializar projeto Laravel + Livewire + Breeze,Feito,Done,Alta,S1,Infra,Base do projeto configurada com autenticação Breeze e Livewire.
+C002,Criar migrations base,Feito,Done,Alta,S1,Banco,"Migrations de users, cache e jobs criadas."
+C003,Criar migrations de domínio,Feito,Done,Alta,S1,Banco,"Migrations de categories, products, product_images, carts, cart_items, addresses, orders e order_items."
+C004,Implementar models das 9 entidades,Feito,Done,Alta,S1,Domínio,Models criados para todo o domínio principal.
+C005,Implementar middleware admin,Feito,Done,Alta,S2,Segurança,Middleware admin criado e aplicado nas rotas administrativas.
+C006,Implementar catálogo público,Feito,Done,Alta,S2,Storefront,"Home, listagem de produtos, categorias e página de detalhe implementadas."
+C007,Implementar ProductSearch Livewire,Feito,Done,Média,S2,Livewire,Busca reativa de produtos implementada.
+C008,Implementar ProductFilter Livewire,Feito,Done,Média,S2,Livewire,Filtros reativos por categoria preço e status implementados.
+C009,Implementar carrinho reativo Livewire,Feito,Done,Alta,S3,Carrinho,"Componentes AddToCart, CartPage, CartSummary e CartIcon implementados."
+C010,Implementar CartService com transações,Feito,Done,Alta,S3,Carrinho,"Serviço com lock de estoque e recálculo de totais implementado."
+C011,Implementar checkout etapa 1 endereço,Feito,Done,Alta,S4,Checkout,Seleção e CRUD de endereços funcionando.
+C012,Implementar checkout etapa 2 pagamento,Feito,Done,Alta,S4,Checkout,Escolha de método de pagamento em UI implementada.
+C013,Implementar CRUD admin de categorias,Feito,Done,Alta,S5,Admin,Painel e CRUD de categorias implementados.
+C014,Implementar CRUD admin de produtos,Feito,Done,Alta,S5,Admin,Painel e CRUD de produtos com upload de imagens implementados.
+C015,Implementar seeders iniciais,Feito,Done,Média,S1,Dados,"Seeders de admin, cliente, categorias e produtos implementados."
+C016,Implementar testes auth perfil carrinho,Feito,Done,Alta,S6,Testes,Testes de autenticação perfil e carrinho criados.
+C017,Executar suíte de testes atual,Feito,Done,Média,S6,Testes,Suíte atual executada com sucesso 33 testes passando.
+C018,Implementar checkout etapa 3 revisão,A Fazer,Todo,Alta,S4,Checkout,Criar tela de revisão final antes de confirmar pedido.
+C019,Criar OrderController@store,A Fazer,Todo,Alta,S4,Checkout,Finalizar pedido dentro de DB::transaction.
+C020,Criar OrderItems no fechamento,A Fazer,Todo,Alta,S4,Checkout,Gerar itens do pedido a partir do carrinho.
+C021,Limpar carrinho após pedido,A Fazer,Todo,Alta,S4,Checkout,Limpar itens e totais ao confirmar pedido.
+C022,Ajustar baixa de estoque para checkout final,A Fazer,Todo,Alta,S4,Checkout,Retirar baixa no carrinho e aplicar no fechamento do pedido.
+C023,Disparar job de confirmação por e-mail,A Fazer,Todo,Alta,S5,Queue,Dispatch de SendOrderConfirmationEmail após checkout.
+C024,Disparar job de boleto,A Fazer,Todo,Alta,S5,Queue,Dispatch de GenerateBoleto quando método for boleto.
+C025,Criar jobs de fila,A Fazer,Todo,Alta,S5,Queue,Criar classes SendOrderConfirmationEmail e GenerateBoleto.
+C026,Criar mailable de confirmação,A Fazer,Todo,Alta,S5,Mail,Criar template e mailable de confirmação do pedido.
+C027,Criar tela Meus Pedidos,A Fazer,Todo,Alta,S4,Pedidos,Listagem de pedidos do cliente com paginação e status.
+C028,Criar tela Detalhe do Pedido,A Fazer,Todo,Alta,S4,Pedidos,Exibir itens endereço pagamento e total do pedido.
+C029,Implementar tracking_number,A Fazer,Todo,Alta,S5,Pedidos,Salvar e exibir código de rastreio.
+C030,Implementar cancelamento com regra de estado,A Fazer,Todo,Alta,S4,Pedidos,"Permitir cancelamento apenas em pending/processing."
+C031,Criar admin de pedidos,A Fazer,Todo,Alta,S5,Admin,"Listar pedidos, atualizar status e tracking no admin."
+C032,Ajustar enum de status do pedido,A Fazer,Todo,Alta,S4,Domínio,Alinhar para pending processing shipped delivered cancelled.
+C033,Remover status paid e ajustar transições,A Fazer,Todo,Alta,S4,Domínio,Atualizar constantes e regras de cancelamento/transição.
+C034,Renomear trackingNumber para tracking_number,A Fazer,Todo,Alta,S4,Domínio,Ajustar migration model e usos no código.
+C035,Ajustar User cart para hasOne,A Fazer,Todo,Média,S4,Domínio,Trocar relação de carts hasMany para cart hasOne.
+C036,Garantir unique user_id em carts,A Fazer,Todo,Média,S4,Banco,Adicionar restrição única para um carrinho por usuário.
+C037,Adicionar campo phone em users,A Fazer,Todo,Média,S2,Auth,Migration model form e validação para telefone.
+C038,Criar Rule CpfValido reutilizável,A Fazer,Todo,Alta,S2,Validação,Criar app/Rules/CpfValido e usar nos requests.
+C039,Criar mutator e accessor de CPF,A Fazer,Todo,Alta,S2,Domínio,Salvar sem máscara e exibir com máscara.
+C040,Migrar validações inline para FormRequests,A Fazer,Todo,Alta,S5,Arquitetura,Padronizar validações em requests dedicados.
+C041,Substituir closures de checkout por controllers,A Fazer,Todo,Alta,S4,Arquitetura,Organizar rotas de checkout em controllers.
+C042,Configurar locale pt_BR,A Fazer,Todo,Alta,S7,Configuração,"Definir APP_LOCALE e fallback para pt_BR."
+C043,Configurar timezone America Sao_Paulo,A Fazer,Todo,Alta,S7,Configuração,Ajustar config/app.php e ambiente.
+C044,Adicionar traduções pt-BR,A Fazer,Todo,Média,S7,I18n,Publicar arquivos lang e padronizar mensagens.
+C045,Padronizar máscara de telefone e CEP,A Fazer,Todo,Média,S7,UX BR,Aplicar máscara no front e normalização no backend.
+C046,Resolver duplicidade QUEUE_CONNECTION,A Fazer,Todo,Média,S7,Configuração,Remover chave duplicada no .env e validar fila.
+C047,Migrar testes para PestPHP,A Fazer,Todo,Média,S6,Testes,Criar tests/Pest.php e converter gradualmente testes.
+C048,Testar checkout completo com jobs,A Fazer,Todo,Alta,S6,Testes,"Cobrir pedido itens estoque limpeza de carrinho e dispatch de jobs."
+C049,Testar máquina de estados de Order,A Fazer,Todo,Alta,S6,Testes,Cobrir transições e restrições de cancelamento/envio.
+C050,Testar permissões de pedidos,A Fazer,Todo,Alta,S6,Testes,Validar acessos cliente e admin em endpoints de pedido.
+C051,Criar README técnico do produto,A Fazer,Todo,Média,S7,Documentação,Documentação funcional e técnica do sistema.
+C052,Preparar documentação final do TCC,A Fazer,Todo,Alta,S7,Documentação,"Checklist final de deploy, arquitetura e evidências."

@@ -98,13 +98,28 @@
 
     <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         @forelse($products as $product)
+            @php
+                $imageUrl = $product->primaryImageUrl();
+            @endphp
             <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <a href="{{ route('store.products.show', $product) }}" class="block overflow-hidden rounded-xl">
+                    @if($imageUrl)
+                        <img src="{{ $imageUrl }}" alt="{{ $product->name }}" class="aspect-square w-full object-cover transition duration-300 hover:scale-[1.02]">
+                    @else
+                        <div class="aspect-square rounded-xl bg-gradient-to-br from-amber-100 to-orange-100"></div>
+                    @endif
+                </a>
                 <p class="text-xs uppercase tracking-wide text-slate-500">{{ $product->category->name ?? 'Sem categoria' }}</p>
                 <h3 class="mt-1 line-clamp-2 text-sm font-black text-slate-900">{{ $product->name }}</h3>
                 <p class="mt-2 text-lg font-black text-[#185FA5]">R$ {{ number_format((float) $product->price, 2, ',', '.') }}</p>
                 <span class="mt-2 inline-flex rounded-full px-2 py-1 text-xs font-semibold {{ $product->is_active ? 'bg-[#3B6D11]/15 text-[#3B6D11]' : 'bg-[#BA7517]/15 text-[#BA7517]' }}">
                     {{ $product->is_active ? 'Ativo' : 'Inativo' }}
                 </span>
+                @if($product->isInStock())
+                    <livewire:add-to-cart :product-id="$product->id" :initial-quantity="1" :compact="true" :key="'filter-add-'.$product->id" />
+                @else
+                    <p class="mt-3 text-xs font-semibold text-[#BA7517]">Sem estoque no momento</p>
+                @endif
             </article>
         @empty
             <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-sm text-slate-500 sm:col-span-2 lg:col-span-4">

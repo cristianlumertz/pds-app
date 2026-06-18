@@ -52,4 +52,10 @@
             </div>
         </div>
     </dl>
+
+    <div class="mt-5">
+        <a href="{{ route('checkout.step1') }}" class="inline-flex w-full items-center justify-center rounded-xl bg-[#185FA5] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#174f88]">
+            Continuar checkout
+        </a>
+    </div>
 </section>

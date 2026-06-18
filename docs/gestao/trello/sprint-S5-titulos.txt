@@ -1,0 +1,9 @@
+[C023] Disparar job de confirmação por e-mail
+[C024] Disparar job de boleto
+[C025] Criar jobs de fila
+[C026] Criar mailable de confirmação
+[C029] Implementar tracking_number
+[C031] Criar admin de pedidos
+[C040] Migrar validações inline para FormRequests
+[C013] Implementar CRUD admin de categorias
+[C014] Implementar CRUD admin de produtos

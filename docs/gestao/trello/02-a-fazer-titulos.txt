@@ -1,0 +1,35 @@
+[C018] Implementar checkout etapa 3 revisão
+[C019] Criar OrderController@store
+[C020] Criar OrderItems no fechamento
+[C021] Limpar carrinho após pedido
+[C022] Ajustar baixa de estoque para checkout final
+[C023] Disparar job de confirmação por e-mail
+[C024] Disparar job de boleto
+[C025] Criar jobs de fila
+[C026] Criar mailable de confirmação
+[C027] Criar tela Meus Pedidos
+[C028] Criar tela Detalhe do Pedido
+[C029] Implementar tracking_number
+[C030] Implementar cancelamento com regra de estado
+[C031] Criar admin de pedidos
+[C032] Ajustar enum de status do pedido
+[C033] Remover status paid e ajustar transições
+[C034] Renomear trackingNumber para tracking_number
+[C035] Ajustar User cart para hasOne
+[C036] Garantir unique user_id em carts
+[C037] Adicionar campo phone em users
+[C038] Criar Rule CpfValido reutilizável
+[C039] Criar mutator e accessor de CPF
+[C040] Migrar validações inline para FormRequests
+[C041] Substituir closures de checkout por controllers
+[C042] Configurar locale pt_BR
+[C043] Configurar timezone America Sao_Paulo
+[C044] Adicionar traduções pt-BR
+[C045] Padronizar máscara de telefone e CEP
+[C046] Resolver duplicidade QUEUE_CONNECTION
+[C047] Migrar testes para PestPHP
+[C048] Testar checkout completo com jobs
+[C049] Testar máquina de estados de Order
+[C050] Testar permissões de pedidos
+[C051] Criar README técnico do produto
+[C052] Preparar documentação final do TCC

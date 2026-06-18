@@ -1,0 +1,6 @@
+[C047] Migrar testes para PestPHP
+[C048] Testar checkout completo com jobs
+[C049] Testar máquina de estados de Order
+[C050] Testar permissões de pedidos
+[C016] Implementar testes auth perfil carrinho
+[C017] Executar suíte de testes atual

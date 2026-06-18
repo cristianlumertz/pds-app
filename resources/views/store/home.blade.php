@@ -7,12 +7,12 @@
 
         <div class="relative grid gap-8 lg:grid-cols-2 lg:items-center">
             <div>
-                <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">E-commerce em Laravel</p>
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">Lorem Ipsum</p>
                 <h1 class="mt-3 text-3xl font-black leading-tight text-slate-900 sm:text-5xl">
-                    Painel de vendas para clientes e administradores
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit
                 </h1>
                 <p class="mt-4 max-w-xl text-sm text-slate-600 sm:text-base">
-                    Explore o catalogo, acesse sua conta e gerencie produtos e categorias no painel admin.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </p>
                 <div class="mt-8 flex flex-wrap gap-3">
                     <a href="{{ route('store.products') }}" class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700">
@@ -49,7 +49,7 @@
             </a>
         </div>
 
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             @forelse($featuredProducts as $product)
                 @php
                     $imageUrl = $product->primaryImageUrl();
@@ -71,7 +71,7 @@
                     </a>
                 </article>
             @empty
-                <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-sm text-slate-500 sm:col-span-2 lg:col-span-4">
+                <div class="col-span-2 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-sm text-slate-500 lg:col-span-4">
                     Sem produtos ativos no momento. Cadastre itens no painel admin para preencher o catalogo.
                 </div>
             @endforelse

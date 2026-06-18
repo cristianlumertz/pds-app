@@ -1,0 +1,7 @@
+[C042] Configurar locale pt_BR
+[C043] Configurar timezone America Sao_Paulo
+[C044] Adicionar traduções pt-BR
+[C045] Padronizar máscara de telefone e CEP
+[C046] Resolver duplicidade QUEUE_CONNECTION
+[C051] Criar README técnico do produto
+[C052] Preparar documentação final do TCC

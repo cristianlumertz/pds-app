@@ -1,0 +1,7 @@
+[C037] Adicionar campo phone em users
+[C038] Criar Rule CpfValido reutilizável
+[C039] Criar mutator e accessor de CPF
+[C005] Implementar middleware admin
+[C006] Implementar catálogo público
+[C007] Implementar ProductSearch Livewire
+[C008] Implementar ProductFilter Livewire
