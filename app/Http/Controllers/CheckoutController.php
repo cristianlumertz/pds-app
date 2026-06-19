@@ -7,11 +7,14 @@ use App\Jobs\SendOrderConfirmationEmail;
 use App\Models\Address;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\Product;
 use App\Services\CartService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class CheckoutController extends Controller
 {
@@ -150,27 +153,80 @@ class CheckoutController extends Controller
 
         $paymentMethod = (string) session('checkout.payment_method');
 
-        $order = DB::transaction(function () use ($cart, $address, $paymentMethod): Order {
-            $order = Order::query()->create([
-                'user_id' => auth()->id(),
-                'address_id' => $address->id,
-                'status' => Order::STATUS_PENDING,
-                'payment_method' => $paymentMethod,
-                'total_amount' => $cart->total_price,
-            ]);
+        try {
+            $order = DB::transaction(function () use ($cart, $address, $paymentMethod): Order {
+                $lockedCart = Cart::query()
+                    ->whereKey($cart->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            foreach ($cart->items as $item) {
-                $order->items()->create([
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->price,
+                $items = $lockedCart->items()
+                    ->with('product')
+                    ->lockForUpdate()
+                    ->get();
+
+                if ($items->isEmpty()) {
+                    throw ValidationException::withMessages([
+                        'cart' => 'Seu carrinho está vazio.',
+                    ]);
+                }
+
+                $order = Order::query()->create([
+                    'user_id' => auth()->id(),
+                    'address_id' => $address->id,
+                    'status' => Order::STATUS_PENDING,
+                    'payment_method' => $paymentMethod,
+                    'total_amount' => $lockedCart->total_price,
                 ]);
-            }
 
-            $this->cartService->clear($cart);
+                foreach ($items as $item) {
+                    $quantity = (int) $item->quantity;
 
-            return $order;
-        });
+                    $product = Product::query()
+                        ->whereKey($item->product_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $product || ! $product->is_active) {
+                        throw ValidationException::withMessages([
+                            'stock' => 'Um dos produtos do carrinho não está disponível.',
+                        ]);
+                    }
+
+                    if (! $product->isInStock($quantity)) {
+                        throw ValidationException::withMessages([
+                            'stock' => "Estoque insuficiente para o produto {$product->name}.",
+                        ]);
+                    }
+
+                    $order->items()->create([
+                        'product_id' => $item->product_id,
+                        'quantity' => $quantity,
+                        'price' => $item->price,
+                    ]);
+
+                    if (! $product->decreaseStock($quantity)) {
+                        throw ValidationException::withMessages([
+                            'stock' => "Estoque insuficiente para o produto {$product->name}.",
+                        ]);
+                    }
+                }
+
+                $this->cartService->clear($lockedCart);
+
+                return $order;
+            });
+        } catch (ValidationException $exception) {
+            return redirect()
+                ->back()
+                ->withErrors($exception->errors())
+                ->withInput();
+        } catch (Throwable) {
+            return redirect()
+                ->back()
+                ->withErrors(['checkout' => 'Não foi possível finalizar o pedido. Tente novamente.'])
+                ->withInput();
+        }
 
         session()->forget('checkout');
 
