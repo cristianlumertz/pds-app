@@ -68,6 +68,7 @@ class RegisteredUserController extends Controller
                 },
             ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'newsletter_opt_in' => ['nullable', 'boolean'],
         ]);
 
         $user = User::create([
@@ -75,12 +76,13 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'cpf' => $request->cpf,
             'password' => Hash::make($request->password),
+            'newsletter_opt_in' => $request->boolean('newsletter_opt_in'),
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('verification.notice', absolute: false));
     }
 }

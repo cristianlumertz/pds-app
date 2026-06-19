@@ -1,13 +1,14 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
-use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -20,29 +21,35 @@ Route::get('/produtos', [ProductController::class, 'index'])->name('store.produc
 Route::get('/produtos/{product:slug}', [ProductController::class, 'show'])->name('store.products.show');
 Route::get('/categorias', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categorias/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
+Route::get('/newsletter/cancelar', [NewsletterController::class, 'unsubscribe'])
+    ->name('newsletter.unsubscribe');
+Route::post('/newsletter/cancelar', [NewsletterController::class, 'confirmUnsubscribe'])
+    ->name('newsletter.confirm-unsubscribe');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/minha-conta', UserDashboardController::class)->name('user.dashboard');
-    Route::get('/carrinho', [CartController::class, 'index'])->name('cart.index');
+    Route::middleware('verified')->group(function () {
+        Route::get('/minha-conta', UserDashboardController::class)->name('user.dashboard');
+        Route::get('/carrinho', [CartController::class, 'index'])->name('cart.index');
 
-    // Endereços do cliente
-    Route::get('/meus-enderecos', [AddressController::class, 'index'])->name('addresses.index');
-    Route::post('/meus-enderecos', [AddressController::class, 'store'])->name('addresses.store');
-    Route::put('/meus-enderecos/{address}', [AddressController::class, 'update'])->name('addresses.update');
-    Route::delete('/meus-enderecos/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+        // Endereços do cliente
+        Route::get('/meus-enderecos', [AddressController::class, 'index'])->name('addresses.index');
+        Route::post('/meus-enderecos', [AddressController::class, 'store'])->name('addresses.store');
+        Route::put('/meus-enderecos/{address}', [AddressController::class, 'update'])->name('addresses.update');
+        Route::delete('/meus-enderecos/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
 
-    // Checkout
-    Route::get('/checkout', [CheckoutController::class, 'step1'])->name('checkout.step1');
-    Route::post('/checkout/step1', [CheckoutController::class, 'saveStep1'])->name('checkout.save-step1');
-    Route::get('/checkout/pagamento', [CheckoutController::class, 'step2'])->name('checkout.step2');
-    Route::post('/checkout/step2', [CheckoutController::class, 'saveStep2'])->name('checkout.save-step2');
-    Route::get('/checkout/revisao', [CheckoutController::class, 'step3'])->name('checkout.step3');
-    Route::post('/checkout/confirmar', [CheckoutController::class, 'store'])->name('checkout.store');
-    Route::get('/checkout/sucesso/{order}', [CheckoutController::class, 'sucesso'])->name('checkout.sucesso');
+        // Checkout
+        Route::get('/checkout', [CheckoutController::class, 'step1'])->name('checkout.step1');
+        Route::post('/checkout/step1', [CheckoutController::class, 'saveStep1'])->name('checkout.save-step1');
+        Route::get('/checkout/pagamento', [CheckoutController::class, 'step2'])->name('checkout.step2');
+        Route::post('/checkout/step2', [CheckoutController::class, 'saveStep2'])->name('checkout.save-step2');
+        Route::get('/checkout/revisao', [CheckoutController::class, 'step3'])->name('checkout.step3');
+        Route::post('/checkout/confirmar', [CheckoutController::class, 'store'])->name('checkout.store');
+        Route::get('/checkout/sucesso/{order}', [CheckoutController::class, 'sucesso'])->name('checkout.sucesso');
+    });
 
     // Pedidos do cliente
     Route::get('/meus-pedidos', [OrderController::class, 'index'])->name('orders.index');

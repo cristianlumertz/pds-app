@@ -46,6 +46,20 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <div class="mt-4">
+            <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+                <input
+                    type="checkbox"
+                    name="newsletter_opt_in"
+                    value="1"
+                    class="rounded border-gray-300 text-indigo-600"
+                    @checked(old('newsletter_opt_in'))
+                >
+                <span>Quero receber ofertas e novidades por e-mail</span>
+            </label>
+            <x-input-error :messages="$errors->get('newsletter_opt_in')" class="mt-2" />
+        </div>
+
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('Already registered?') }}

@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\VerifyEmailNotification;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -25,6 +27,7 @@ class User extends Authenticatable
         'cpf',
         'password',
         'is_admin',
+        'newsletter_opt_in',
     ];
 
     /**
@@ -48,7 +51,14 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'newsletter_opt_in' => 'boolean',
         ];
+    }
+
+    public function scopeNewsletterSubscribers(Builder $query): Builder
+    {
+        return $query->where('newsletter_opt_in', true)
+            ->whereNotNull('email_verified_at');
     }
 
     public function carts(): HasMany
@@ -74,5 +84,10 @@ class User extends Authenticatable
     public function hasOrders(): bool
     {
         return $this->orders()->exists();
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification);
     }
 }
