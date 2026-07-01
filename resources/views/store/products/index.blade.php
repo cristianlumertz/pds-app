@@ -1,10 +1,20 @@
 @extends('layouts.app')
 
 @section('content')
-    <section class="mb-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 class="text-2xl font-black text-slate-900">Catalogo de produtos</h1>
-        <p class="mt-1 text-sm text-slate-600">Busca e filtros reativos sem recarregar a pagina.</p>
-    </section>
+    <nav class="flex items-center gap-2 text-xs text-[#767676]" aria-label="Breadcrumb">
+        <a href="{{ route('store.home') }}" class="transition hover:text-[#2B5FAA] hover:underline">Home</a>
+        <span aria-hidden="true">›</span>
+        <span class="font-semibold text-[#444444]">Produtos</span>
+    </nav>
 
-    <livewire:product-filter />
+    <header class="mt-4">
+        <h1 class="text-2xl font-bold text-[#1A1A1A]">Catálogo de Produtos</h1>
+        <p class="mt-1 text-[13px] text-[#767676]">
+            {{ $products->total() ?? '' }} produtos encontrados
+        </p>
+    </header>
+
+    <div class="mt-6">
+        <livewire:product-filter />
+    </div>
 @endsection

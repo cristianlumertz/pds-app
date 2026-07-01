@@ -27,8 +27,8 @@ Route::post('/newsletter/cancelar', [NewsletterController::class, 'confirmUnsubs
     ->name('newsletter.confirm-unsubscribe');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    return redirect()->route(auth()->user()->is_admin ? 'admin.dashboard' : 'user.dashboard');
+})->middleware('auth')->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::middleware('verified')->group(function () {

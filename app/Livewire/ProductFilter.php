@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Attributes\Validate;
@@ -19,39 +20,63 @@ class ProductFilter extends Component
     #[Validate('nullable|string|max:100')]
     public string $term = '';
 
-    #[Validate('nullable|integer|exists:categories,id')]
-    public string $categoryId = '';
+    #[Url(as: 'category', except: '')]
+    #[Validate('nullable|string|max:255')]
+    public string $category = '';
 
+    #[Url(as: 'min_price', except: '')]
     #[Validate('nullable|numeric|min:0')]
     public string $minPrice = '';
 
+    #[Url(as: 'max_price', except: '')]
     #[Validate('nullable|numeric|min:0')]
     public string $maxPrice = '';
 
-    #[Validate('nullable|in:all,1,0')]
-    public string $isActive = 'all';
+    #[Url(as: 'in_stock', except: false)]
+    #[Validate('boolean')]
+    public bool $inStock = false;
 
-    public int $perPage = 8;
+    #[Url(as: 'on_sale', except: false)]
+    #[Validate('boolean')]
+    public bool $onSale = false;
 
+    #[Url(as: 'sort', except: 'relevance')]
+    #[Validate('in:relevance,price_asc,price_desc,newest')]
+    public string $sort = 'relevance';
+
+    public int $perPage = 9;
+
+    /**
+     * @return array<string, string>
+     */
     protected function messages(): array
     {
         return [
             'term.string' => 'O termo de busca deve ser um texto válido.',
             'term.max' => 'O termo de busca deve ter no máximo 100 caracteres.',
-            'categoryId.integer' => 'Selecione uma categoria válida.',
-            'categoryId.exists' => 'A categoria selecionada não existe.',
+            'category.string' => 'Selecione uma categoria válida.',
+            'category.max' => 'Selecione uma categoria válida.',
             'minPrice.numeric' => 'O preço mínimo deve ser numérico.',
             'minPrice.min' => 'O preço mínimo não pode ser negativo.',
             'maxPrice.numeric' => 'O preço máximo deve ser numérico.',
             'maxPrice.min' => 'O preço máximo não pode ser negativo.',
-            'isActive.in' => 'Selecione um status de produto válido.',
+            'inStock.boolean' => 'O filtro de estoque é inválido.',
+            'onSale.boolean' => 'O filtro de promoção é inválido.',
+            'sort.in' => 'Selecione uma ordenação válida.',
         ];
     }
 
     public function updated(string $property): void
     {
-        $this->validateOnly($property);
-        $this->resetPage();
+        if ($property === 'sort') {
+            $this->validateOnly('sort');
+            $this->resetPage();
+        }
+    }
+
+    public function applyFilters(): void
+    {
+        $this->validate();
 
         if (
             $this->minPrice !== ''
@@ -59,9 +84,12 @@ class ProductFilter extends Component
             && (float) $this->minPrice > (float) $this->maxPrice
         ) {
             $this->addError('maxPrice', 'O preço máximo deve ser maior ou igual ao preço mínimo.');
-        } else {
-            $this->resetValidation('maxPrice');
+
+            return;
         }
+
+        $this->resetValidation();
+        $this->resetPage();
     }
 
     #[On('header-search:updated')]
@@ -80,8 +108,8 @@ class ProductFilter extends Component
     #[On('product-filter:clear')]
     public function clearFilters(): void
     {
-        $this->reset('categoryId', 'minPrice', 'maxPrice', 'isActive');
-        $this->isActive = 'all';
+        $this->reset('term', 'category', 'minPrice', 'maxPrice', 'inStock', 'onSale', 'sort');
+        $this->sort = 'relevance';
         $this->resetValidation();
         $this->resetPage();
     }
@@ -95,15 +123,23 @@ class ProductFilter extends Component
     public function render(): View
     {
         $query = Product::query()
-            ->with('category')
-            ->orderBy('name');
+            ->with(['category', 'productImages'])
+            ->where('is_active', true);
 
         if ($this->term !== '') {
-            $query->where('name', 'like', '%'.$this->term.'%');
+            $search = trim($this->term);
+            $query->where(function ($builder) use ($search): void {
+                $builder
+                    ->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%')
+                    ->orWhere('sku', 'like', '%'.$search.'%');
+            });
         }
 
-        if ($this->categoryId !== '') {
-            $query->where('category_id', (int) $this->categoryId);
+        if ($this->category !== '') {
+            $query->whereHas('category', function ($builder): void {
+                $builder->where('slug', $this->category);
+            });
         }
 
         if ($this->minPrice !== '') {
@@ -114,16 +150,34 @@ class ProductFilter extends Component
             $query->where('price', '<=', (float) $this->maxPrice);
         }
 
-        if ($this->isActive !== 'all') {
-            $query->where('is_active', $this->isActive === '1');
+        if ($this->inStock) {
+            $query->where('stock', '>', 0);
         }
+
+        if ($this->onSale) {
+            if (Schema::hasColumn('products', 'is_promotional')) {
+                $query->where('is_promotional', true);
+            } elseif (Schema::hasColumn('products', 'old_price')) {
+                $query->whereNotNull('old_price')
+                    ->whereColumn('old_price', '>', 'price');
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        match ($this->sort) {
+            'price_asc' => $query->orderBy('price'),
+            'price_desc' => $query->orderByDesc('price'),
+            'newest' => $query->latest(),
+            default => $query->orderBy('name'),
+        };
 
         $products = $query->paginate($this->perPage);
 
         $categories = Category::query()
             ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'slug']);
 
         return view('livewire.product-filter', [
             'products' => $products,

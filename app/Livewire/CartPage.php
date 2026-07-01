@@ -234,7 +234,7 @@ class CartPage extends Component
         }
 
         return $user->carts()
-            ->with(['items.product'])
+            ->with(['items.product.productImages'])
             ->latest('id')
             ->first();
     }

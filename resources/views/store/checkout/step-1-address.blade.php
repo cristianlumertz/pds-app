@@ -91,7 +91,7 @@
 
                         <div>
                             <x-input-label for="city" value="Cidade" />
-                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full" value="{{ old('city') }}" placeholder="Torres" />
+                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full" value="{{ old('city') }}" placeholder="Capão da Canoa" />
                             @error('city')
                                 <p class="mt-1 text-sm font-semibold text-[#993C1D]">{{ $message }}</p>
                             @enderror
