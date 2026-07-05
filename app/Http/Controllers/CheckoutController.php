@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\PagarmePaymentException;
 use App\Jobs\GenerateBoleto;
 use App\Jobs\SendOrderConfirmationEmail;
 use App\Models\Address;
@@ -9,17 +10,20 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\CartService;
+use App\Services\PagarmeService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class CheckoutController extends Controller
 {
     public function __construct(
-        private readonly CartService $cartService
+        private readonly CartService $cartService,
+        private readonly PagarmeService $pagarmeService
     ) {
         $this->middleware('auth');
     }
@@ -176,6 +180,7 @@ class CheckoutController extends Controller
                     'address_id' => $address->id,
                     'status' => Order::STATUS_PENDING,
                     'payment_method' => $paymentMethod,
+                    'payment_status' => Order::PAYMENT_STATUS_PENDING,
                     'total_amount' => $lockedCart->total_price,
                 ]);
 
@@ -236,7 +241,7 @@ class CheckoutController extends Controller
             GenerateBoleto::dispatch($order)->delay(now()->addSeconds(5));
         }
 
-        return redirect()->route('checkout.sucesso', $order);
+        return $this->redirectToPagarmeCheckout($order);
     }
 
     public function sucesso(Order $order): View
@@ -244,6 +249,59 @@ class CheckoutController extends Controller
         abort_if($order->user_id !== auth()->id(), 403, 'Você não tem permissão para visualizar este pedido.');
 
         return view('store.checkout.sucesso', compact('order'));
+    }
+
+    public function paymentUnavailable(Order $order): View
+    {
+        abort_if($order->user_id !== auth()->id(), 403, 'Você não tem permissão para visualizar este pedido.');
+
+        return view('store.checkout.payment-unavailable', compact('order'));
+    }
+
+    public function retryPayment(Order $order): RedirectResponse
+    {
+        abort_if($order->user_id !== auth()->id(), 403, 'Você não tem permissão para pagar este pedido.');
+
+        if ($order->isPaid()) {
+            return redirect()
+                ->route('orders.show', $order)
+                ->with('status', 'Este pedido já está pago.');
+        }
+
+        return $this->redirectToPagarmeCheckout($order);
+    }
+
+    private function redirectToPagarmeCheckout(Order $order): RedirectResponse
+    {
+        try {
+            $paymentLink = $this->pagarmeService->createPaymentLink($order);
+            $checkoutUrl = $paymentLink['url'] ?? null;
+
+            if (! is_string($checkoutUrl) || trim($checkoutUrl) === '') {
+                throw new PagarmePaymentException('A Pagar.me não retornou uma URL de checkout.');
+            }
+
+            $paymentLinkId = $paymentLink['id'] ?? null;
+
+            $order->forceFill([
+                'pagarme_payment_link_id' => is_scalar($paymentLinkId) ? (string) $paymentLinkId : null,
+                'pagarme_checkout_url' => $checkoutUrl,
+            ])->save();
+
+            return redirect()->away($checkoutUrl);
+        } catch (Throwable $exception) {
+            Log::error('Não foi possível iniciar o pagamento na Pagar.me.', [
+                'order_id' => $order->id,
+                'exception' => get_class($exception),
+                'message' => $exception->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('checkout.payment-unavailable', $order)
+                ->withErrors([
+                    'payment' => 'Não foi possível iniciar o pagamento. Tente novamente.',
+                ]);
+        }
     }
 
     private function getCart(): ?Cart

@@ -21,6 +21,17 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Configuracao Pagar.me
+
+Para usar o ambiente de testes/sandbox da Pagar.me, configure as variaveis abaixo no `.env`:
+
+```env
+PAGARME_SECRET_KEY=
+PAGARME_BASE_URL=https://sdx-api.pagar.me/core/v5
+```
+
+`PAGARME_SECRET_KEY` deve receber a chave secreta de teste/sandbox. `PAGARME_BASE_URL` aponta para a API sandbox e tambem possui esse valor como padrao em `config/services.php`.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.

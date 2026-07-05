@@ -21,6 +21,16 @@ class Order extends Model
 
     public const STATUS_CANCELLED = 'cancelled';
 
+    public const PAYMENT_STATUS_PENDING = 'pending';
+
+    public const PAYMENT_STATUS_PAID = 'paid';
+
+    public const PAYMENT_STATUS_FAILED = 'failed';
+
+    public const PAYMENT_STATUS_REFUNDED = 'refunded';
+
+    public const PAYMENT_STATUS_CANCELED = 'canceled';
+
     /**
      * @var list<string>
      */
@@ -29,6 +39,9 @@ class Order extends Model
         'address_id',
         'status',
         'payment_method',
+        'payment_status',
+        'pagarme_payment_link_id',
+        'pagarme_checkout_url',
         'tracking_number',
         'total_amount',
     ];
@@ -66,6 +79,11 @@ class Order extends Model
     public function canBeCancelled(): bool
     {
         return in_array((string) $this->status, [self::STATUS_PENDING, self::STATUS_PROCESSING], true);
+    }
+
+    public function isPaid(): bool
+    {
+        return (string) $this->payment_status === self::PAYMENT_STATUS_PAID;
     }
 
     public function markAsShipped(string $trackingNumber = ''): void

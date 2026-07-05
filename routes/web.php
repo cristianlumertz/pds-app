@@ -9,6 +9,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\PagarmeWebhookController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -25,6 +26,10 @@ Route::get('/newsletter/cancelar', [NewsletterController::class, 'unsubscribe'])
     ->name('newsletter.unsubscribe');
 Route::post('/newsletter/cancelar', [NewsletterController::class, 'confirmUnsubscribe'])
     ->name('newsletter.confirm-unsubscribe');
+
+Route::post('/webhooks/pagarme', PagarmeWebhookController::class)
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->name('webhooks.pagarme');
 
 Route::get('/dashboard', function () {
     return redirect()->route(auth()->user()->is_admin ? 'admin.dashboard' : 'user.dashboard');
@@ -49,6 +54,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/checkout/revisao', [CheckoutController::class, 'step3'])->name('checkout.step3');
         Route::post('/checkout/confirmar', [CheckoutController::class, 'store'])->name('checkout.store');
         Route::get('/checkout/sucesso/{order}', [CheckoutController::class, 'sucesso'])->name('checkout.sucesso');
+        Route::get('/checkout/pagamento/indisponivel/{order}', [CheckoutController::class, 'paymentUnavailable'])->name('checkout.payment-unavailable');
+        Route::post('/checkout/pagamento/{order}/tentar-novamente', [CheckoutController::class, 'retryPayment'])->name('checkout.payment.retry');
     });
 
     // Pedidos do cliente
