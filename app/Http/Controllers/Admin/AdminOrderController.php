@@ -4,18 +4,31 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\StockService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminOrderController extends Controller
 {
+    public function __construct(
+        private readonly StockService $stockService
+    ) {
+    }
+
     public function index(Request $request): View
     {
         $orders = Order::query()
             ->with(['user', 'address'])
             ->when($request->query('status'), function ($query, string $status) {
                 $query->where('status', $status);
+            })
+            ->when($request->query('payment_status'), function ($query, string $status) {
+                $query->where('payment_status', $status);
+            })
+            ->when($request->query('payment_method'), function ($query, string $method) {
+                $query->where('payment_method', $method);
             })
             ->latest()
             ->paginate(15);
@@ -30,7 +43,16 @@ class AdminOrderController extends Controller
 
     public function show(Order $order): View
     {
-        $order->load(['items.product', 'user', 'address']);
+        $order->load([
+            'items.product',
+            'user',
+            'address',
+            'orderCoupons.coupon',
+            'payments',
+            'paymentEvents',
+            'stockMovements.product',
+            'stockMovements.user',
+        ]);
 
         return view('admin.orders.show', compact('order'));
     }
@@ -47,15 +69,28 @@ class AdminOrderController extends Controller
             'tracking_number.max' => 'O código de rastreamento deve ter no máximo 100 caracteres.',
         ]);
 
-        if (! empty($validated['status'])) {
-            $order->status = $validated['status'];
-        }
+        DB::transaction(function () use ($order, $validated, $request): void {
+            $previousStatus = (string) $order->status;
+            $nextStatus = $validated['status'] ?? null;
 
-        if (! empty($validated['tracking_number'])) {
-            $order->tracking_number = $validated['tracking_number'];
-        }
+            if (! empty($nextStatus)) {
+                $order->status = $nextStatus;
+            }
 
-        $order->save();
+            if (! empty($validated['tracking_number'])) {
+                $order->tracking_number = $validated['tracking_number'];
+            }
+
+            if ($nextStatus === Order::STATUS_CANCELLED && $previousStatus !== Order::STATUS_CANCELLED) {
+                $this->stockService->restoreOrderStock(
+                    $order,
+                    $request->user(),
+                    'Estoque restaurado por cancelamento de pedido'
+                );
+            }
+
+            $order->save();
+        });
 
         return redirect()
             ->back()

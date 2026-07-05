@@ -3,8 +3,10 @@
 namespace App\Livewire;
 
 use App\Models\Cart;
+use App\Services\CouponService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -34,6 +36,7 @@ class CartSummary extends Component
 
     public function mount(): void
     {
+        $this->couponCode = (string) session('checkout.coupon_code', '');
         $this->recalculate();
     }
 
@@ -41,13 +44,30 @@ class CartSummary extends Component
     {
         $this->validateOnly('couponCode');
         $this->feedback = '';
-        $this->recalculate();
+
+        $normalizedCode = app(CouponService::class)->normalizeCode($this->couponCode);
+
+        if ($normalizedCode !== session('checkout.coupon_code')) {
+            session()->forget('checkout.coupon_code');
+            $this->recalculate();
+        }
     }
 
     public function applyCoupon(): void
     {
         $this->validateOnly('couponCode');
         $this->feedback = '';
+        $this->resetErrorBag('couponCode');
+
+        if (trim($this->couponCode) === '') {
+            session()->forget('checkout.coupon_code');
+            $this->feedback = 'Cupom removido.';
+            $this->recalculate();
+
+            return;
+        }
+
+        session(['checkout.coupon_code' => app(CouponService::class)->normalizeCode($this->couponCode)]);
         $this->recalculate();
     }
 
@@ -76,37 +96,54 @@ class CartSummary extends Component
         $cart->calculateTotal();
 
         $this->subtotal = (float) $cart->total_price;
-        $this->shippingCost = $this->subtotal >= 300 ? 0.0 : 24.90;
-        $this->discountAmount = $this->resolveDiscount($this->subtotal, $this->couponCode);
+        $this->shippingCost = $this->subtotal > 299 ? 0.0 : 29.90;
+        $this->discountAmount = $this->resolveDiscount(
+            $this->subtotal,
+            $this->shippingCost,
+            (string) session('checkout.coupon_code', '')
+        );
 
         $rawTotal = $this->subtotal + $this->shippingCost - $this->discountAmount;
         $this->totalAmount = max(0, round($rawTotal, 2));
     }
 
-    private function resolveDiscount(float $subtotal, string $couponCode): float
+    private function resolveDiscount(float $subtotal, float $shippingCost, string $couponCode): float
     {
-        $coupon = strtoupper(trim($couponCode));
+        $code = app(CouponService::class)->normalizeCode($couponCode);
 
-        if ($coupon === '') {
+        if ($code === null) {
+            session()->forget('checkout.coupon_code');
             return 0;
         }
 
-        if ($coupon === 'OBRA10') {
-            $this->feedback = 'Cupom OBRA10 aplicado: 10% de desconto.';
+        $couponService = app(CouponService::class);
+        $coupon = $couponService->findByCode($code);
 
-            return round($subtotal * 0.10, 2);
-        }
-
-        if ($coupon === 'FRETEGRATIS') {
-            $this->feedback = 'Cupom FRETEGRATIS aplicado: frete zerado.';
-            $this->shippingCost = 0.0;
+        if (! $coupon) {
+            session()->forget('checkout.coupon_code');
+            $this->addError('couponCode', 'Cupom inválido ou expirado.');
 
             return 0;
         }
 
-        $this->addError('couponCode', 'Cupom inválido ou expirado.');
+        try {
+            $discount = $couponService->calculateDiscount($coupon, $subtotal, $shippingCost);
+        } catch (ValidationException $exception) {
+            session()->forget('checkout.coupon_code');
 
-        return 0;
+            foreach ($exception->errors() as $messages) {
+                $this->addError('couponCode', $messages[0] ?? 'Cupom inválido ou expirado.');
+                break;
+            }
+
+            return 0;
+        }
+
+        $this->couponCode = $code;
+        session(['checkout.coupon_code' => $code]);
+        $this->feedback = "Cupom {$code} aplicado.";
+
+        return $discount;
     }
 
     private function currentCart(): ?Cart

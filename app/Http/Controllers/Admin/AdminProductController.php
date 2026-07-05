@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Services\StockService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,11 @@ use Illuminate\Validation\Rule;
 
 class AdminProductController extends Controller
 {
+    public function __construct(
+        private readonly StockService $stockService
+    ) {
+    }
+
     public function index(): View
     {
         $products = Product::query()
@@ -63,10 +69,20 @@ class AdminProductController extends Controller
                 'description' => $data['description'] ?? null,
                 'sku' => $data['sku'],
                 'price' => $data['price'],
-                'stock' => (int) $data['stock'],
+                'stock' => 0,
                 'image_url' => $data['image_url'] ?? null,
                 'is_active' => $request->boolean('is_active'),
             ]);
+
+            if ((int) $data['stock'] > 0) {
+                $this->stockService->increaseStock(
+                    $product,
+                    (int) $data['stock'],
+                    null,
+                    $request->user(),
+                    'Entrada inicial de estoque no painel admin'
+                );
+            }
 
             $this->storeUploadedImages($product, $request);
         });
@@ -78,7 +94,10 @@ class AdminProductController extends Controller
 
     public function edit(Product $product): View
     {
-        $product->load('productImages');
+        $product->load([
+            'productImages',
+            'stockMovements' => fn ($query) => $query->with(['user', 'order'])->latest()->take(10),
+        ]);
 
         $categories = Category::query()
             ->where('is_active', true)
@@ -124,10 +143,16 @@ class AdminProductController extends Controller
                 'description' => $data['description'] ?? null,
                 'sku' => $data['sku'],
                 'price' => $data['price'],
-                'stock' => (int) $data['stock'],
                 'image_url' => $data['image_url'] ?? null,
                 'is_active' => $request->boolean('is_active'),
             ]);
+
+            $this->stockService->adjustStock(
+                $product,
+                (int) $data['stock'],
+                $request->user(),
+                'Ajuste de estoque no painel admin'
+            );
 
             $this->storeUploadedImages($product, $request);
         });

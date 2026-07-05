@@ -16,6 +16,8 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
+        'product_name',
+        'product_sku',
         'quantity',
         'price',
     ];
@@ -26,6 +28,7 @@ class OrderItem extends Model
     protected function casts(): array
     {
         return [
+            'quantity' => 'integer',
             'price' => 'decimal:2',
         ];
     }

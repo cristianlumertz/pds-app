@@ -13,6 +13,11 @@ use Throwable;
 
 class CartService
 {
+    public function __construct(
+        private readonly StockService $stockService
+    ) {
+    }
+
     /**
      
      * @throws ValidationException
@@ -40,9 +45,9 @@ class CartService
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                if (! $lockedProduct->isInStock($quantity)) {
+                if (! $lockedProduct->is_active) {
                     throw ValidationException::withMessages([
-                        'stock' => 'Estoque insuficiente para a quantidade solicitada.',
+                        'product' => 'Este produto está inativo e não pode ser adicionado ao carrinho.',
                     ]);
                 }
 
@@ -50,13 +55,12 @@ class CartService
                     'product_id' => $lockedProduct->id,
                 ]);
 
-                $item->quantity = ((int) $item->quantity) + $quantity;
+                $newQuantity = ((int) $item->quantity) + $quantity;
+                $this->stockService->validateAvailableStock($lockedProduct, $newQuantity);
+
+                $item->quantity = $newQuantity;
                 $item->price = (float) $lockedProduct->price;
                 $item->save();
-
-                if (! $lockedProduct->decreaseStock($quantity)) {
-                    throw new RuntimeException('Não foi possível atualizar o estoque do produto.');
-                }
 
                 $this->calculateTotal($cart);
 
@@ -93,16 +97,6 @@ class CartService
                     throw ValidationException::withMessages([
                         'cart_item' => 'O item informado não foi encontrado no carrinho.',
                     ]);
-                }
-
-                /** @var Product|null $product */
-                $product = Product::query()
-                    ->whereKey($productId)
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($product) {
-                    $product->increment('stock', (int) $item->quantity);
                 }
 
                 $item->delete();
@@ -149,23 +143,6 @@ class CartService
     {
         try {
             DB::transaction(function () use ($cart): void {
-                /** @var \Illuminate\Support\Collection<int, CartItem> $items */
-                $items = $cart->items()
-                    ->lockForUpdate()
-                    ->get();
-
-                foreach ($items as $item) {
-                    /** @var Product|null $product */
-                    $product = Product::query()
-                        ->whereKey($item->product_id)
-                        ->lockForUpdate()
-                        ->first();
-
-                    if ($product) {
-                        $product->increment('stock', (int) $item->quantity);
-                    }
-                }
-
                 $cart->items()->delete();
                 $cart->forceFill([
                     'total_price' => 0,

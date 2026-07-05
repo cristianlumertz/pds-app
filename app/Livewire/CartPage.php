@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Services\StockService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -124,20 +125,13 @@ class CartPage extends Component
                     ]);
                 }
 
-                $oldQuantity = (int) $item->quantity;
-                $diff = $newQuantity - $oldQuantity;
-
-                if ($diff > 0 && ! $product->isInStock($diff)) {
+                if (! $product->is_active) {
                     throw ValidationException::withMessages([
-                        "quantities.$itemId" => 'Estoque insuficiente para aumentar essa quantidade.',
+                        "quantities.$itemId" => 'Este produto não está mais disponível.',
                     ]);
                 }
 
-                if ($diff > 0) {
-                    $product->decreaseStock($diff);
-                } elseif ($diff < 0) {
-                    $product->increment('stock', abs($diff));
-                }
+                app(StockService::class)->validateAvailableStock($product, $newQuantity);
 
                 $item->quantity = $newQuantity;
                 $item->price = (float) $product->price;
@@ -181,16 +175,6 @@ class CartPage extends Component
                     throw ValidationException::withMessages([
                         'cart' => 'Item do carrinho não encontrado.',
                     ]);
-                }
-
-                /** @var Product|null $product */
-                $product = Product::query()
-                    ->whereKey($item->product_id)
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($product) {
-                    $product->increment('stock', (int) $item->quantity);
                 }
 
                 $item->delete();

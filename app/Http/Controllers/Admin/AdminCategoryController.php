@@ -15,7 +15,8 @@ class AdminCategoryController extends Controller
     public function index(): View
     {
         $categories = Category::query()
-            ->withCount('products')
+            ->with('parent')
+            ->withCount(['products', 'children'])
             ->latest()
             ->paginate(12);
 
@@ -24,7 +25,11 @@ class AdminCategoryController extends Controller
 
     public function create(): View
     {
-        return view('admin.categories.create');
+        $parentCategories = Category::query()
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.categories.create', compact('parentCategories'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -32,6 +37,7 @@ class AdminCategoryController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug'],
+            'parent_id' => ['nullable', 'exists:categories,id'],
             'description' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -41,6 +47,7 @@ class AdminCategoryController extends Controller
         Category::query()->create([
             'name' => $data['name'],
             'slug' => $this->ensureUniqueSlug($slug),
+            'parent_id' => $data['parent_id'] ?? null,
             'description' => $data['description'] ?? null,
             'is_active' => $request->boolean('is_active'),
         ]);
@@ -52,7 +59,12 @@ class AdminCategoryController extends Controller
 
     public function edit(Category $category): View
     {
-        return view('admin.categories.edit', compact('category'));
+        $parentCategories = Category::query()
+            ->whereKeyNot($category->id)
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.categories.edit', compact('category', 'parentCategories'));
     }
 
     public function update(Request $request, Category $category): RedirectResponse
@@ -65,6 +77,11 @@ class AdminCategoryController extends Controller
                 'max:255',
                 Rule::unique('categories', 'slug')->ignore($category->id),
             ],
+            'parent_id' => [
+                'nullable',
+                'exists:categories,id',
+                Rule::notIn([$category->id]),
+            ],
             'description' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -74,6 +91,7 @@ class AdminCategoryController extends Controller
         $category->update([
             'name' => $data['name'],
             'slug' => $this->ensureUniqueSlug($slug, $category->id),
+            'parent_id' => $data['parent_id'] ?? null,
             'description' => $data['description'] ?? null,
             'is_active' => $request->boolean('is_active'),
         ]);
@@ -85,10 +103,10 @@ class AdminCategoryController extends Controller
 
     public function destroy(Category $category): RedirectResponse
     {
-        if ($category->products()->exists()) {
+        if ($category->products()->exists() || $category->children()->exists()) {
             return redirect()
                 ->route('admin.categories.index')
-                ->with('status', 'Nao e possivel excluir uma categoria com produtos.');
+                ->with('status', 'Nao e possivel excluir uma categoria com produtos ou subcategorias.');
         }
 
         $category->delete();

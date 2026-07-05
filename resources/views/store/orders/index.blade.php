@@ -18,6 +18,14 @@
             'delivered' => 'Entregue',
             'cancelled' => 'Cancelado',
         ];
+        $paymentStatusLabels = [
+            'pending' => 'Pagamento pendente',
+            'paid' => 'Pago',
+            'failed' => 'Pagamento falhou',
+            'cancelled' => 'Pagamento cancelado',
+            'expired' => 'Pagamento expirado',
+            'refunded' => 'Reembolsado',
+        ];
 
         $currentStatus = request('status', '');
     @endphp
@@ -137,6 +145,9 @@
                                         >
                                             {{ $status['label'] }}
                                         </span>
+                                        <p class="mt-2 text-sm font-semibold text-[#3D3D3A]/70">
+                                            {{ $paymentStatusLabels[$order->payment_status] ?? ucfirst((string) $order->payment_status) }}
+                                        </p>
                                     </div>
 
                                     <div class="text-left sm:text-right">

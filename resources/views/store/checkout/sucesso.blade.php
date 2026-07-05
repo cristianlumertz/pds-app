@@ -3,12 +3,20 @@
 @section('content')
     @php
         $paymentInstructions = [
-            'boleto' => 'Seu boleto será gerado e enviado por e-mail em instantes.',
-            'pix' => 'Acesse seu e-mail para obter o QR Code do PIX.',
-            'cartao' => 'Seu pagamento está sendo processado.',
+            'boleto' => 'Seu pagamento será confirmado pela Pagar.me após a compensação do boleto.',
+            'pix' => 'Seu pagamento será confirmado pela Pagar.me após a conclusão do PIX.',
+            'cartao' => 'Seu pagamento será confirmado pela Pagar.me após a aprovação do cartão.',
         ];
 
         $instruction = $paymentInstructions[$order->payment_method] ?? 'Seu pedido está sendo processado.';
+        $paymentStatusLabels = [
+            'pending' => 'Pagamento pendente',
+            'paid' => 'Pago',
+            'failed' => 'Pagamento falhou',
+            'cancelled' => 'Pagamento cancelado',
+            'expired' => 'Pagamento expirado',
+            'refunded' => 'Reembolsado',
+        ];
     @endphp
 
     <div class="min-h-screen bg-[#F1EFE8] py-12">
@@ -58,10 +66,17 @@
                         </div>
 
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-[#3D3D3A]/60">Total</p>
-                            <p class="mt-1 text-base font-bold text-[#185FA5]">R$ {{ number_format($order->total_amount, 2, ',', '.') }}</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-[#3D3D3A]/60">Status do pagamento</p>
+                            <p class="mt-1 text-base font-bold text-[#3D3D3A]">{{ $paymentStatusLabels[$order->payment_status] ?? ucfirst((string) $order->payment_status) }}</p>
                         </div>
                     </div>
+
+                    <dl class="mt-5 space-y-2 border-t border-[#3D3D3A]/10 pt-5 text-sm">
+                        <div class="flex justify-between"><dt>Subtotal</dt><dd class="font-bold">R$ {{ number_format((float) $order->subtotal_amount, 2, ',', '.') }}</dd></div>
+                        <div class="flex justify-between text-[#1D9E75]"><dt>Desconto</dt><dd class="font-bold">- R$ {{ number_format((float) $order->discount_amount, 2, ',', '.') }}</dd></div>
+                        <div class="flex justify-between"><dt>Frete</dt><dd class="font-bold">R$ {{ number_format((float) $order->shipping_amount, 2, ',', '.') }}</dd></div>
+                        <div class="flex justify-between border-t border-[#3D3D3A]/10 pt-3 text-base"><dt class="font-black">Total</dt><dd class="font-black text-[#185FA5]">R$ {{ number_format((float) $order->total_amount, 2, ',', '.') }}</dd></div>
+                    </dl>
                 </div>
 
                 <div class="mt-6 rounded-3xl border border-[#185FA5]/15 bg-[#185FA5]/10 px-5 py-4 text-sm font-semibold text-[#185FA5]">

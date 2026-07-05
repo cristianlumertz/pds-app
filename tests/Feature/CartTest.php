@@ -60,7 +60,7 @@ class CartTest extends TestCase
         })->middleware('auth');
     }
 
-    public function test_adiciona_item_no_carrinho_e_reduz_estoque_com_sucesso(): void
+    public function test_adiciona_item_no_carrinho_sem_reduzir_estoque(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create([
@@ -80,7 +80,7 @@ class CartTest extends TestCase
         $cart->refresh();
         $product->refresh();
 
-        $this->assertSame(7, (int) $product->stock);
+        $this->assertSame(10, (int) $product->stock);
         $this->assertSame(3, (int) $cart->item_count);
         $this->assertEquals(599.70, (float) $cart->total_price);
     }
@@ -100,7 +100,7 @@ class CartTest extends TestCase
         $service->addItem($cart, $product, 2);
     }
 
-    public function test_remove_item_do_carrinho_devolve_estoque_e_recalcula_totais(): void
+    public function test_remove_item_do_carrinho_nao_altera_estoque_e_recalcula_totais(): void
     {
         $user = User::factory()->create();
         $product = Product::factory()->create([
@@ -118,6 +118,52 @@ class CartTest extends TestCase
         $cart->refresh();
 
         $this->assertSame(20, (int) $product->stock);
+        $this->assertSame(0, (int) $cart->item_count);
+        $this->assertEquals(0.0, (float) $cart->total_price);
+        $this->assertSame(0, $cart->items()->count());
+    }
+
+    public function test_atualiza_quantidade_no_carrinho_sem_alterar_estoque(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create([
+            'price' => 25.00,
+            'stock' => 10,
+            'is_active' => true,
+        ]);
+        $cart = Cart::factory()->create(['user_id' => $user->id]);
+
+        $service = app(CartService::class);
+        $service->addItem($cart, $product, 2);
+        $item = $service->addItem($cart, $product, 3);
+
+        $product->refresh();
+        $cart->refresh();
+
+        $this->assertSame(10, (int) $product->stock);
+        $this->assertSame(5, (int) $item->quantity);
+        $this->assertSame(5, (int) $cart->item_count);
+        $this->assertEquals(125.0, (float) $cart->total_price);
+    }
+
+    public function test_limpa_carrinho_sem_alterar_estoque(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create([
+            'price' => 40.00,
+            'stock' => 10,
+            'is_active' => true,
+        ]);
+        $cart = Cart::factory()->create(['user_id' => $user->id]);
+
+        $service = app(CartService::class);
+        $service->addItem($cart, $product, 2);
+        $service->clear($cart);
+
+        $product->refresh();
+        $cart->refresh();
+
+        $this->assertSame(10, (int) $product->stock);
         $this->assertSame(0, (int) $cart->item_count);
         $this->assertEquals(0.0, (float) $cart->total_price);
         $this->assertSame(0, $cart->items()->count());
@@ -142,7 +188,7 @@ class CartTest extends TestCase
         $this->assertEquals(95.0, (float) $cart->total_price);
     }
 
-    public function test_decrease_stock_retorna_true_com_estoque_e_false_sem_estoque(): void
+    public function test_decrease_stock_legado_reduz_estoque_apenas_quando_chamado_diretamente(): void
     {
         $product = Product::factory()->create([
             'stock' => 2,
@@ -176,7 +222,7 @@ class CartTest extends TestCase
             ->assertJsonPath('message', 'Item adicionado com sucesso.');
 
         $product->refresh();
-        $this->assertSame(8, (int) $product->stock);
+        $this->assertSame(10, (int) $product->stock);
     }
 
     public function test_retorna_422_quando_quantidade_enviada_e_invalida(): void

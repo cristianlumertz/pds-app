@@ -32,13 +32,13 @@ CEP {{ preg_replace('/(\d{5})(\d{3})/', '$1-$2', preg_replace('/\D/', '', (strin
 ## Pagamento
 
 @if ($order->payment_method === 'boleto')
-Seu boleto será gerado e enviado por e-mail em instantes.
+O boleto será disponibilizado no checkout hospedado da Pagar.me.
 @elseif ($order->payment_method === 'pix')
-Acesse seu e-mail para obter o QR Code do PIX.
+O QR Code PIX será disponibilizado no checkout hospedado da Pagar.me.
 @elseif ($order->payment_method === 'cartao')
-Seu pagamento está sendo processado.
+Os dados do cartão são informados somente no checkout hospedado da Pagar.me.
 @else
-Seu pagamento está em processamento.
+Seu pagamento será processado pelo checkout hospedado da Pagar.me.
 @endif
 
 Obrigado por comprar conosco.  

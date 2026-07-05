@@ -47,6 +47,7 @@
             <div>
                 <label for="stock" class="text-sm font-semibold text-slate-700">Estoque</label>
                 <input id="stock" name="stock" type="number" min="0" step="1" value="{{ old('stock', $product->stock) }}" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-amber-200 transition focus:ring-2">
+                <p class="mt-1 text-xs text-slate-500">Alterações de estoque geram movimento de ajuste.</p>
                 @error('stock')
                     <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
                 @enderror
@@ -115,5 +116,41 @@
                 </a>
             </div>
         </form>
+    </section>
+
+    <section class="mx-auto mt-6 w-full max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="text-xl font-black text-slate-900">Últimas movimentações de estoque</h2>
+        <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full text-left text-sm">
+                <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                        <th class="px-2 py-2">Tipo</th>
+                        <th class="px-2 py-2 text-right">Qtd</th>
+                        <th class="px-2 py-2">Motivo</th>
+                        <th class="px-2 py-2">Pedido</th>
+                        <th class="px-2 py-2">Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($product->stockMovements as $movement)
+                        <tr class="border-b border-slate-100">
+                            <td class="px-2 py-2 text-slate-700">{{ $movement->type }}</td>
+                            <td class="px-2 py-2 text-right font-bold text-slate-800">{{ $movement->quantity }}</td>
+                            <td class="px-2 py-2 text-slate-600">{{ $movement->reason ?: '-' }}</td>
+                            <td class="px-2 py-2">
+                                @if($movement->order)
+                                    <a href="{{ route('admin.pedidos.show', $movement->order) }}" class="font-semibold text-[#185FA5] hover:underline">#{{ $movement->order_id }}</a>
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td class="px-2 py-2 text-slate-600">{{ $movement->created_at?->format('d/m/Y H:i') }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="px-2 py-4 text-sm text-slate-500">Nenhuma movimentação registrada.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </section>
 @endsection

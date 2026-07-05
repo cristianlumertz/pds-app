@@ -25,8 +25,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'cpf',
+        'phone',
         'password',
         'is_admin',
+        'status',
         'newsletter_opt_in',
     ];
 
@@ -74,6 +76,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
     }
 
     public function getFullName(): string

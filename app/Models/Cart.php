@@ -42,6 +42,11 @@ class Cart extends Model
         return $this->hasMany(CartItem::class);
     }
 
+    public function cartItems(): HasMany
+    {
+        return $this->items();
+    }
+
     public function addItem(Product $product, int $quantity = 1): CartItem
     {
         $quantity = max(1, $quantity);

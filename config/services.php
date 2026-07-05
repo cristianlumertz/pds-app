@@ -31,6 +31,9 @@ return [
     'pagarme' => [
         'secret_key' => env('PAGARME_SECRET_KEY'),
         'base_url' => env('PAGARME_BASE_URL', 'https://sdx-api.pagar.me/core/v5'),
+        'success_url' => env('PAGARME_SUCCESS_URL'),
+        'cancel_url' => env('PAGARME_CANCEL_URL'),
+        'webhook_secret' => env('PAGARME_WEBHOOK_SECRET'),
     ],
 
     'slack' => [

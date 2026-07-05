@@ -33,6 +33,7 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',
+            'stock' => 'integer',
             'is_active' => 'boolean',
         ];
     }
@@ -50,6 +51,11 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
     }
 
     public function productImages(): HasMany
@@ -83,12 +89,20 @@ class Product extends Model
     {
         $quantity = max(1, $quantity);
 
-        if (! $this->isInStock($quantity)) {
+        try {
+            app(\App\Services\StockService::class)->decreaseStock(
+                $this,
+                $quantity,
+                null,
+                null,
+                'Baixa de estoque via método legado do produto'
+            );
+
+            $this->refresh();
+
+            return true;
+        } catch (\Throwable) {
             return false;
         }
-
-        $this->decrement('stock', $quantity);
-
-        return true;
     }
 }

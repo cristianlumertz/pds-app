@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminCouponController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminStockMovementController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
@@ -75,6 +78,9 @@ Route::prefix('admin')
         Route::get('/', AdminDashboardController::class)->name('dashboard');
         Route::resource('categories', AdminCategoryController::class)->except('show');
         Route::resource('products', AdminProductController::class)->except('show');
+        Route::resource('coupons', AdminCouponController::class)->except('show');
+        Route::resource('users', AdminUserController::class)->only(['index', 'show', 'edit', 'update']);
+        Route::get('estoque/movimentacoes', [AdminStockMovementController::class, 'index'])->name('stock-movements.index');
         Route::resource('pedidos', AdminOrderController::class)
             ->parameters(['pedidos' => 'order'])
             ->only(['index', 'show', 'update']);

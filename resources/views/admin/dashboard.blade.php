@@ -11,8 +11,17 @@
                 <a href="{{ route('admin.categories.index') }}" class="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-500">
                     Categorias
                 </a>
+                <a href="{{ route('admin.users.index') }}" class="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-500">
+                    Usuários
+                </a>
                 <a href="{{ route('admin.products.index') }}" class="rounded-full bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-700">
                     Produtos
+                </a>
+                <a href="{{ route('admin.coupons.index') }}" class="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-500">
+                    Cupons
+                </a>
+                <a href="{{ route('admin.stock-movements.index') }}" class="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-500">
+                    Estoque
                 </a>
             </div>
         </div>
@@ -33,6 +42,26 @@
             <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pedidos</p>
                 <p class="mt-2 text-3xl font-black text-slate-900">{{ $stats['orders_count'] }}</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pedidos pagos</p>
+                <p class="mt-2 text-3xl font-black text-slate-900">{{ $stats['paid_orders_count'] }}</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pagamentos pendentes</p>
+                <p class="mt-2 text-3xl font-black text-slate-900">{{ $stats['pending_orders_count'] }}</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Receita paga</p>
+                <p class="mt-2 text-2xl font-black text-slate-900">R$ {{ number_format((float) $stats['revenue_total'], 2, ',', '.') }}</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cupons usados</p>
+                <p class="mt-2 text-3xl font-black text-slate-900">{{ $stats['used_coupons_count'] }}</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Estoque baixo</p>
+                <p class="mt-2 text-3xl font-black text-slate-900">{{ $stats['low_stock_products_count'] }}</p>
             </article>
         </div>
     </section>

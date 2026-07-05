@@ -17,8 +17,10 @@
                 <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
                     <tr>
                         <th class="px-2 py-2">Nome</th>
+                        <th class="px-2 py-2">Categoria pai</th>
                         <th class="px-2 py-2">Slug</th>
                         <th class="px-2 py-2">Produtos</th>
+                        <th class="px-2 py-2">Subcategorias</th>
                         <th class="px-2 py-2">Status</th>
                         <th class="px-2 py-2 text-right">Acoes</th>
                     </tr>
@@ -27,8 +29,10 @@
                     @forelse($categories as $category)
                         <tr class="border-b border-slate-100">
                             <td class="px-2 py-2 font-semibold text-slate-800">{{ $category->name }}</td>
+                            <td class="px-2 py-2 text-slate-600">{{ $category->parent?->name ?? '-' }}</td>
                             <td class="px-2 py-2 text-slate-600">{{ $category->slug }}</td>
                             <td class="px-2 py-2 text-slate-600">{{ $category->products_count }}</td>
+                            <td class="px-2 py-2 text-slate-600">{{ $category->children_count }}</td>
                             <td class="px-2 py-2">
                                 <span class="rounded-full px-2 py-1 text-xs font-semibold {{ $category->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
                                     {{ $category->is_active ? 'Ativa' : 'Inativa' }}
@@ -51,7 +55,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-2 py-4 text-sm text-slate-500">Nenhuma categoria cadastrada.</td>
+                            <td colspan="7" class="px-2 py-4 text-sm text-slate-500">Nenhuma categoria cadastrada.</td>
                         </tr>
                     @endforelse
                 </tbody>

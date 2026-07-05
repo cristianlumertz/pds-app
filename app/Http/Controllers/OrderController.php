@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Services\StockService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        private readonly StockService $stockService
+    ) {
+    }
+
     public function index(Request $request): View
     {
         $orders = $request->user()
@@ -27,12 +34,12 @@ class OrderController extends Controller
     {
         abort_if($order->user_id !== auth()->id(), 403);
 
-        $order->load(['items.product', 'address']);
+        $order->load(['items.product', 'address', 'orderCoupons.coupon', 'payments']);
 
         return view('store.orders.show', compact('order'));
     }
 
-    public function cancel(Order $order): RedirectResponse
+    public function cancel(Request $request, Order $order): RedirectResponse
     {
         abort_if($order->user_id !== auth()->id(), 403);
 
@@ -42,9 +49,17 @@ class OrderController extends Controller
                 ->withErrors(['order' => 'Este pedido não pode ser cancelado.']);
         }
 
-        $order->update([
-            'status' => Order::STATUS_CANCELLED,
-        ]);
+        DB::transaction(function () use ($order, $request): void {
+            $this->stockService->restoreOrderStock(
+                $order,
+                $request->user(),
+                'Estoque restaurado por cancelamento de pedido'
+            );
+
+            $order->update([
+                'status' => Order::STATUS_CANCELLED,
+            ]);
+        });
 
         return redirect()
             ->back()

@@ -3,9 +3,18 @@
 @section('content')
     @php
         $items = $items ?? ($cart?->items ?? collect());
-        $subtotal = $cart ? (float) $cart->total_price : (float) $items->sum(fn ($item) => $item->getSubtotal());
-        $shipping = $subtotal > 299 ? 0 : 29.90;
-        $total = $subtotal + $shipping;
+        $summary = $summary ?? [
+            'subtotal_amount' => $cart ? (float) $cart->total_price : (float) $items->sum(fn ($item) => $item->getSubtotal()),
+            'discount_amount' => 0,
+            'shipping_amount' => 0,
+            'total_amount' => 0,
+            'coupon_code' => null,
+        ];
+        $subtotal = (float) $summary['subtotal_amount'];
+        $discount = (float) $summary['discount_amount'];
+        $shipping = (float) $summary['shipping_amount'];
+        $total = (float) $summary['total_amount'];
+        $couponCode = $summary['coupon_code'] ?? null;
         $paymentMethod = session('checkout.payment_method');
         $paymentLabels = [
             'cartao' => ['label' => 'Cartão', 'icon' => '💳'],
@@ -91,7 +100,7 @@
                     <section class="rounded-3xl bg-white p-6 shadow-sm">
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h2 class="text-2xl font-bold text-[#3D3D3A]">Forma de pagamento</h2>
+                                <h2 class="text-2xl font-bold text-[#3D3D3A]">Preferência de pagamento</h2>
                                 <span class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#185FA5]/10 px-4 py-2 text-sm font-bold text-[#185FA5]">
                                     <span>{{ $payment['icon'] }}</span>
                                     {{ $payment['label'] }}
@@ -197,6 +206,26 @@
                                         Frete grátis aplicado para compras acima de R$ 299,00.
                                     </p>
                                 @endif
+
+                                @if ($couponCode)
+                                    <div class="flex items-center justify-between text-[#3D3D3A]/75">
+                                        <span>Cupom</span>
+                                        <span class="font-bold text-[#185FA5]">{{ $couponCode }}</span>
+                                    </div>
+                                @endif
+
+                                @if ($discount > 0)
+                                    <div class="flex items-center justify-between text-[#3D3D3A]/75">
+                                        <span>Desconto</span>
+                                        <span class="font-bold text-[#1D9E75]">- R$ {{ number_format($discount, 2, ',', '.') }}</span>
+                                    </div>
+                                @endif
+
+                                @error('coupon')
+                                    <p class="rounded-full bg-[#993C1D]/10 px-3 py-2 text-xs font-bold text-[#993C1D]">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
                             </div>
 
                             <div class="mt-5 flex items-center justify-between border-t border-[#3D3D3A]/10 pt-5">
@@ -211,11 +240,11 @@
                                     type="submit"
                                     class="inline-flex w-full items-center justify-center rounded-full bg-[#1D9E75] px-6 py-4 text-base font-bold text-white shadow-sm transition hover:bg-[#168463] focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:ring-offset-2"
                                 >
-                                    Confirmar pedido
+                                    Ir para pagamento na Pagar.me
                                 </button>
 
                                 <p class="mt-3 text-center text-xs text-[#3D3D3A]/60">
-                                    Ao confirmar, você concorda com os termos de compra.
+                                    O pedido será criado e o pagamento será feito no checkout hospedado da Pagar.me.
                                 </p>
                             </form>
                         </section>
@@ -231,7 +260,7 @@
 
                                 <div class="flex items-center gap-3 rounded-3xl bg-[#F1EFE8] px-4 py-3">
                                     <span class="flex h-9 w-9 items-center justify-center rounded-full bg-[#1D9E75]/10 text-sm font-bold text-[#1D9E75]">✓</span>
-                                    <span class="text-sm font-semibold text-[#3D3D3A]">Pagamento seguro</span>
+                                    <span class="text-sm font-semibold text-[#3D3D3A]">Checkout hospedado pela Pagar.me</span>
                                 </div>
                             </div>
                         </section>

@@ -24,6 +24,19 @@
             </div>
 
             <div>
+                <label for="parent_id" class="text-sm font-semibold text-slate-700">Categoria pai (opcional)</label>
+                <select id="parent_id" name="parent_id" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-amber-200 transition focus:ring-2">
+                    <option value="">Nenhuma</option>
+                    @foreach($parentCategories as $parentCategory)
+                        <option value="{{ $parentCategory->id }}" @selected((string) old('parent_id') === (string) $parentCategory->id)>{{ $parentCategory->name }}</option>
+                    @endforeach
+                </select>
+                @error('parent_id')
+                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
                 <label for="description" class="text-sm font-semibold text-slate-700">Descricao</label>
                 <textarea id="description" name="description" rows="4" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-amber-200 transition focus:ring-2">{{ old('description') }}</textarea>
             </div>

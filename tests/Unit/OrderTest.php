@@ -1,82 +1,108 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Order;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-uses(RefreshDatabase::class);
+class OrderTest extends TestCase
+{
+    use RefreshDatabase;
 
-it('canBeCancelled retorna true para status pending', function () {
-    $order = Order::factory()->create([
-        'status' => Order::STATUS_PENDING,
-    ]);
+    public function test_can_be_cancelled_returns_true_for_pending_status(): void
+    {
+        $order = Order::factory()->create([
+            'status' => Order::STATUS_PENDING,
+        ]);
 
-    expect($order->canBeCancelled())->toBeTrue();
-});
+        $this->assertTrue($order->canBeCancelled());
+    }
 
-it('canBeCancelled retorna true para status processing', function () {
-    $order = Order::factory()->create([
-        'status' => Order::STATUS_PROCESSING,
-    ]);
+    public function test_can_be_cancelled_returns_true_for_processing_status(): void
+    {
+        $order = Order::factory()->create([
+            'status' => Order::STATUS_PROCESSING,
+        ]);
 
-    expect($order->canBeCancelled())->toBeTrue();
-});
+        $this->assertTrue($order->canBeCancelled());
+    }
 
-it('canBeCancelled retorna false para status shipped', function () {
-    $order = Order::factory()->create([
-        'status' => Order::STATUS_SHIPPED,
-    ]);
+    public function test_can_be_cancelled_returns_false_for_shipped_status(): void
+    {
+        $order = Order::factory()->create([
+            'status' => Order::STATUS_SHIPPED,
+        ]);
 
-    expect($order->canBeCancelled())->toBeFalse();
-});
+        $this->assertFalse($order->canBeCancelled());
+    }
 
-it('canBeCancelled retorna false para status delivered', function () {
-    $order = Order::factory()->create([
-        'status' => Order::STATUS_DELIVERED,
-    ]);
+    public function test_can_be_cancelled_returns_false_for_delivered_status(): void
+    {
+        $order = Order::factory()->create([
+            'status' => Order::STATUS_DELIVERED,
+        ]);
 
-    expect($order->canBeCancelled())->toBeFalse();
-});
+        $this->assertFalse($order->canBeCancelled());
+    }
 
-it('canBeCancelled retorna false para status cancelled', function () {
-    $order = Order::factory()->create([
-        'status' => Order::STATUS_CANCELLED,
-    ]);
+    public function test_can_be_cancelled_returns_false_for_cancelled_status(): void
+    {
+        $order = Order::factory()->create([
+            'status' => Order::STATUS_CANCELLED,
+        ]);
 
-    expect($order->canBeCancelled())->toBeFalse();
-});
+        $this->assertFalse($order->canBeCancelled());
+    }
 
-it('markAsShipped muda status para shipped e salva tracking_number', function () {
-    $order = Order::factory()->create([
-        'status' => Order::STATUS_PENDING,
-        'tracking_number' => null,
-    ]);
+    public function test_is_paid_returns_true_only_for_paid_payment_status(): void
+    {
+        $paidOrder = Order::factory()->create([
+            'payment_status' => Order::PAYMENT_STATUS_PAID,
+        ]);
 
-    $order->markAsShipped('BR123456789');
+        $pendingOrder = Order::factory()->create([
+            'payment_status' => Order::PAYMENT_STATUS_PENDING,
+        ]);
 
-    $order->refresh();
+        $this->assertTrue($paidOrder->isPaid());
+        $this->assertFalse($pendingOrder->isPaid());
+    }
 
-    expect($order->status)->toBe(Order::STATUS_SHIPPED)
-        ->and($order->tracking_number)->toBe('BR123456789');
-});
+    public function test_mark_as_shipped_changes_status_and_saves_tracking_number(): void
+    {
+        $order = Order::factory()->create([
+            'status' => Order::STATUS_PENDING,
+            'tracking_number' => null,
+        ]);
 
-it('markAsShipped nao altera se ja esta shipped', function () {
-    $order = Order::factory()->create([
-        'status' => Order::STATUS_SHIPPED,
-        'tracking_number' => 'BR123456789',
-    ]);
+        $order->markAsShipped('BR123456789');
+        $order->refresh();
 
-    $order->markAsShipped('BR987654321');
+        $this->assertSame(Order::STATUS_SHIPPED, $order->status);
+        $this->assertSame('BR123456789', $order->tracking_number);
+    }
 
-    $order->refresh();
+    public function test_mark_as_shipped_does_not_change_existing_shipped_order(): void
+    {
+        $order = Order::factory()->create([
+            'status' => Order::STATUS_SHIPPED,
+            'tracking_number' => 'BR123456789',
+        ]);
 
-    expect($order->status)->toBe(Order::STATUS_SHIPPED)
-        ->and($order->tracking_number)->toBe('BR123456789');
-});
+        $order->markAsShipped('BR987654321');
+        $order->refresh();
 
-it('getStatus retorna o status capitalizado', function () {
-    $order = Order::factory()->create([
-        'status' => Order::STATUS_PENDING,
-    ]);
+        $this->assertSame(Order::STATUS_SHIPPED, $order->status);
+        $this->assertSame('BR123456789', $order->tracking_number);
+    }
 
-    expect($order->getStatus())->toBe('Pending');
-});
+    public function test_get_status_returns_capitalized_status(): void
+    {
+        $order = Order::factory()->create([
+            'status' => Order::STATUS_PENDING,
+        ]);
+
+        $this->assertSame('Pending', $order->getStatus());
+    }
+}

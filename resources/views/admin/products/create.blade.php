@@ -47,6 +47,7 @@
             <div>
                 <label for="stock" class="text-sm font-semibold text-slate-700">Estoque</label>
                 <input id="stock" name="stock" type="number" min="0" step="1" value="{{ old('stock', 0) }}" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-amber-200 transition focus:ring-2">
+                <p class="mt-1 text-xs text-slate-500">A entrada inicial será registrada no histórico de estoque.</p>
                 @error('stock')
                     <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
                 @enderror
