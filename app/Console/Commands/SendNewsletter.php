@@ -83,6 +83,12 @@ class SendNewsletter extends Command
             $ctaUrl = url($ctaUrl);
         }
 
+        if ($this->isInsecureProductionUrl($ctaUrl)) {
+            $this->error('Em produção, a URL do CTA da newsletter precisa usar HTTPS.');
+
+            return self::INVALID;
+        }
+
         $sentCount = 0;
         $progressBar = $this->getOutput()->createProgressBar($subscriberCount);
         $progressBar->start();
@@ -126,5 +132,11 @@ class SendNewsletter extends Command
         $value = trim((string) $this->option($name));
 
         return $value !== '' ? $value : null;
+    }
+
+    private function isInsecureProductionUrl(string $url): bool
+    {
+        return app()->environment('production')
+            && strtolower((string) parse_url($url, PHP_URL_SCHEME)) === 'http';
     }
 }

@@ -53,7 +53,7 @@ class AdminProductController extends Controller
             'sku' => ['required', 'string', 'max:100', 'unique:products,sku'],
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
-            'image_url' => ['nullable', 'url', 'max:255'],
+            'image_url' => ['nullable', 'url', 'max:255', $this->secureExternalUrlRule()],
             'images' => ['nullable', 'array'],
             'images.*' => ['nullable', 'image', 'max:4096'],
             'is_active' => ['nullable', 'boolean'],
@@ -127,7 +127,7 @@ class AdminProductController extends Controller
             ],
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
-            'image_url' => ['nullable', 'url', 'max:255'],
+            'image_url' => ['nullable', 'url', 'max:255', $this->secureExternalUrlRule()],
             'images' => ['nullable', 'array'],
             'images.*' => ['nullable', 'image', 'max:4096'],
             'is_active' => ['nullable', 'boolean'],
@@ -240,5 +240,18 @@ class AdminProductController extends Controller
         }
 
         return $candidate;
+    }
+
+    private function secureExternalUrlRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            if (! app()->environment('production') || ! is_string($value) || trim($value) === '') {
+                return;
+            }
+
+            if (strtolower((string) parse_url($value, PHP_URL_SCHEME)) !== 'https') {
+                $fail('Em produção, a URL da imagem precisa usar HTTPS.');
+            }
+        };
     }
 }
