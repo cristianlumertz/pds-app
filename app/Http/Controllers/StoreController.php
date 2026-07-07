@@ -11,19 +11,52 @@ class StoreController extends Controller
 {
     public function home(): View
     {
-        $featuredProducts = Product::query()
+        $baseProductQuery = fn () => Product::query()
             ->with(['category', 'productImages'])
-            ->where('is_active', true)
+            ->where('is_active', true);
+
+        $novidades = $baseProductQuery()
             ->latest()
-            ->take(8)
+            ->take(12)
+            ->get();
+
+        $ofertas = $baseProductQuery()
+            ->orderBy('price')
+            ->latest()
+            ->take(12)
             ->get();
 
         $categories = Category::query()
             ->where('is_active', true)
+            ->withCount(['products' => fn ($query) => $query->where('is_active', true)])
             ->orderBy('name')
             ->get();
 
-        return view('store.home', compact('featuredProducts', 'categories'));
+        $categorySections = collect([
+            'ferramentas' => 'Ferramentas',
+            'eletrica' => 'Elétrica',
+            'hidraulica' => 'Hidráulica',
+            'tintas-e-acabamentos' => 'Tintas',
+            'materiais-basicos' => 'Materiais Básicos',
+        ])->map(function (string $title, string $slug) use ($baseProductQuery): ?array {
+            $products = $baseProductQuery()
+                ->whereHas('category', fn ($query) => $query->where('slug', $slug))
+                ->latest()
+                ->take(12)
+                ->get();
+
+            if ($products->isEmpty()) {
+                return null;
+            }
+
+            return [
+                'title' => $title,
+                'slug' => $slug,
+                'products' => $products,
+            ];
+        })->filter()->values();
+
+        return view('store.home', compact('novidades', 'ofertas', 'categorySections', 'categories'));
     }
 
     public function products(Request $request): View

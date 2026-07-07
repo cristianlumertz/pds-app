@@ -17,17 +17,19 @@ class AddToCart extends Component
 {
     public int $productId;
     public bool $compact = false;
+    public string $buttonLabel = 'Adicionar ao carrinho';
 
     #[Validate('required|integer|min:1|max:99')]
     public int $quantity = 1;
 
     public string $feedback = '';
 
-    public function mount(int $productId, int $initialQuantity = 1, bool $compact = false): void
+    public function mount(int $productId, int $initialQuantity = 1, bool $compact = false, string $buttonLabel = 'Adicionar ao carrinho'): void
     {
         $this->productId = $productId;
         $this->quantity = max(1, min(99, $initialQuantity));
         $this->compact = $compact;
+        $this->buttonLabel = $buttonLabel;
     }
 
     protected function messages(): array

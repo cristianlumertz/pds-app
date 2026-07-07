@@ -35,7 +35,7 @@
             ];
         @endphp
 
-        <header class="sticky top-0 z-40" x-data="{ open: false }">
+        <header class="sticky top-0 z-40" x-data="{ open: false, departmentsOpen: false }">
             <div class="h-9 bg-[#1A3A6B] text-white">
                 <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-4 text-xs sm:px-6 lg:px-8">
                     <a href="tel:+5551999999999" class="font-semibold hover:underline">
@@ -154,23 +154,62 @@
                 </div>
             </div>
 
-            <nav class="hidden h-9 bg-[#D42B2B] md:block" aria-label="Categorias de produtos">
+            <nav class="relative hidden h-9 bg-[#D42B2B] md:block" aria-label="Departamentos de produtos">
                 <div class="mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-                    @foreach ($categoryLinks as $categoryLink)
-                        <a
-                            href="{{ route('store.products', ['category' => $categoryLink['slug']]) }}"
-                            class="flex h-full items-center whitespace-nowrap px-3 text-[13px] font-semibold text-white transition hover:bg-black/15"
+                    <div class="relative h-full" x-on:click.outside="departmentsOpen = false">
+                        <button
+                            type="button"
+                            class="flex h-full items-center gap-2 whitespace-nowrap px-4 text-[13px] font-bold uppercase text-white transition hover:bg-black/15 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#D42B2B]"
+                            x-on:click="departmentsOpen = ! departmentsOpen"
+                            x-bind:aria-expanded="departmentsOpen"
+                            aria-haspopup="true"
+                            aria-controls="departments-menu"
                         >
-                            {{ $categoryLink['label'] }}
-                        </a>
-                    @endforeach
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+                                <path d="M4 6h16"></path>
+                                <path d="M4 12h16"></path>
+                                <path d="M4 18h16"></path>
+                            </svg>
+                            Todos departamentos
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 transition" x-bind:class="{ 'rotate-180': departmentsOpen }" aria-hidden="true">
+                                <path d="m6 9 6 6 6-6"></path>
+                            </svg>
+                        </button>
 
-                    <a
-                        href="{{ route('store.products') }}"
-                        class="ml-auto rounded bg-[#FFF3CD] px-3 py-1 text-[13px] font-bold text-[#856404] transition hover:bg-[#ffe69c]"
-                    >
-                        Ver ofertas
-                    </a>
+                        <div
+                            id="departments-menu"
+                            x-show="departmentsOpen"
+                            x-cloak
+                            x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="-translate-y-1 opacity-0"
+                            x-transition:enter-end="translate-y-0 opacity-100"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="translate-y-0 opacity-100"
+                            x-transition:leave-end="-translate-y-1 opacity-0"
+                            class="absolute left-0 top-full z-50 mt-0 w-72 overflow-hidden rounded-b border border-[#E0E0E0] bg-white shadow-xl"
+                        >
+                            <a
+                                href="{{ route('store.products') }}"
+                                class="block border-b border-[#E0E0E0] px-4 py-3 text-sm font-bold text-[#1A3A6B] transition hover:bg-[#F5F5F5]"
+                                x-on:click="departmentsOpen = false"
+                            >
+                                Todos os produtos
+                            </a>
+
+                            <div class="py-2">
+                                @foreach ($categoryLinks as $categoryLink)
+                                    <a
+                                        href="{{ route('store.products', ['category' => $categoryLink['slug']]) }}"
+                                        class="flex items-center justify-between px-4 py-2.5 text-sm font-semibold text-[#444444] transition hover:bg-[#F5F5F5] hover:text-[#1A3A6B]"
+                                        x-on:click="departmentsOpen = false"
+                                    >
+                                        {{ $categoryLink['label'] }}
+                                        <span class="text-[#D42B2B]" aria-hidden="true">›</span>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </nav>
 
@@ -217,19 +256,45 @@
                         </button>
                     </form>
 
-                    <nav class="mt-5 grid grid-cols-2 gap-1" aria-label="Categorias no menu móvel">
-                        @foreach ($categoryLinks as $categoryLink)
+                    <nav class="mt-5" aria-label="Departamentos no menu móvel">
+                        <button
+                            type="button"
+                            class="flex w-full items-center justify-between rounded border border-white/20 px-3 py-2.5 text-left text-sm font-bold uppercase text-white transition hover:bg-white/10"
+                            x-on:click="departmentsOpen = ! departmentsOpen"
+                            x-bind:aria-expanded="departmentsOpen"
+                            aria-controls="mobile-departments-menu"
+                        >
+                            Todos departamentos
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 transition" x-bind:class="{ 'rotate-180': departmentsOpen }" aria-hidden="true">
+                                <path d="m6 9 6 6 6-6"></path>
+                            </svg>
+                        </button>
+
+                        <div
+                            id="mobile-departments-menu"
+                            x-show="departmentsOpen"
+                            x-cloak
+                            x-transition
+                            class="mt-2 grid grid-cols-2 gap-1"
+                        >
                             <a
-                                href="{{ route('store.products', ['category' => $categoryLink['slug']]) }}"
+                                href="{{ route('store.products') }}"
                                 class="rounded px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
-                                x-on:click="open = false"
+                                x-on:click="open = false; departmentsOpen = false"
                             >
-                                {{ $categoryLink['label'] }}
+                                Todos os produtos
                             </a>
-                        @endforeach
-                        <a href="{{ route('store.products') }}" class="rounded bg-[#FFF3CD] px-3 py-2.5 text-sm font-bold text-[#856404]" x-on:click="open = false">
-                            Ver ofertas
-                        </a>
+
+                            @foreach ($categoryLinks as $categoryLink)
+                                <a
+                                    href="{{ route('store.products', ['category' => $categoryLink['slug']]) }}"
+                                    class="rounded px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+                                    x-on:click="open = false; departmentsOpen = false"
+                                >
+                                    {{ $categoryLink['label'] }}
+                                </a>
+                            @endforeach
+                        </div>
                     </nav>
 
                     <div class="mt-5 border-t border-white/15 pt-5">

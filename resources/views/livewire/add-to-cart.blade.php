@@ -5,7 +5,7 @@
             wire:click="add"
             class="inline-flex w-full items-center justify-center rounded-none bg-[#D42B2B] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#B02020] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#B02020]"
         >
-            Adicionar ao carrinho
+            {{ $buttonLabel }}
         </button>
 
         @error('product')
@@ -46,9 +46,9 @@
             type="button"
             wire:click="add"
             class="mt-3 w-full rounded bg-[#D42B2B] px-4 py-3.5 text-sm font-bold text-white transition hover:bg-[#B02020] focus:outline-none focus:ring-2 focus:ring-[#D42B2B] focus:ring-offset-2"
-        >
-            Adicionar ao carrinho
-        </button>
+    >
+        {{ $buttonLabel }}
+    </button>
     </div>
 
     @error('product')
