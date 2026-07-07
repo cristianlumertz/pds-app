@@ -48,7 +48,7 @@
                             <div><p class="text-xs font-semibold uppercase text-[#3D3D3A]/60">Cliente</p><p class="mt-1 font-bold">{{ $order->user?->name ?? 'Cliente removido' }}</p></div>
                             <div><p class="text-xs font-semibold uppercase text-[#3D3D3A]/60">Pedido</p><p class="mt-1 font-bold">{{ $status['label'] }}</p></div>
                             <div><p class="text-xs font-semibold uppercase text-[#3D3D3A]/60">Pagamento</p><p class="mt-1 font-bold">{{ $paymentStatuses[$order->payment_status] ?? ucfirst((string) $order->payment_status) }}</p></div>
-                            <div><p class="text-xs font-semibold uppercase text-[#3D3D3A]/60">Método</p><p class="mt-1 font-bold">{{ ucfirst((string) $order->payment_method) }}</p></div>
+                            <div><p class="text-xs font-semibold uppercase text-[#3D3D3A]/60">Método</p><p class="mt-1 font-bold">{{ $order->paymentMethodLabel() }}</p></div>
                             <div><p class="text-xs font-semibold uppercase text-[#3D3D3A]/60">Criado em</p><p class="mt-1 font-bold">{{ $order->created_at?->format('d/m/Y H:i') }}</p></div>
                             <div><p class="text-xs font-semibold uppercase text-[#3D3D3A]/60">Rastreio</p><p class="mt-1 font-bold">{{ $order->tracking_number ?: 'Não informado' }}</p></div>
                         </div>
@@ -117,11 +117,15 @@
                                 </thead>
                                 <tbody class="divide-y divide-[#3D3D3A]/10">
                                     @forelse ($order->payments as $payment)
+                                        @php
+                                            $paymentCheckoutUrl = (string) $payment->pagarme_checkout_url;
+                                            $canOpenPaymentCheckout = str_starts_with($paymentCheckoutUrl, 'https://');
+                                        @endphp
                                         <tr>
-                                            <td class="py-4">{{ $payment->payment_method }}</td>
+                                            <td class="py-4">{{ $payment->paymentMethodLabel() }}</td>
                                             <td class="py-4 font-bold">{{ $payment->status }}</td>
                                             <td class="py-4 text-right">R$ {{ number_format((float) $payment->amount, 2, ',', '.') }}</td>
-                                            <td class="py-4 text-xs">{{ $payment->pagarme_payment_link_id ?: '-' }} @if($payment->pagarme_checkout_url)<a class="ml-2 text-[#185FA5] underline" href="{{ $payment->pagarme_checkout_url }}" target="_blank">abrir</a>@endif</td>
+                                            <td class="py-4 text-xs">{{ $payment->pagarme_payment_link_id ?: '-' }} @if($canOpenPaymentCheckout)<a class="ml-2 text-[#185FA5] underline" href="{{ $paymentCheckoutUrl }}" target="_blank" rel="noopener noreferrer">abrir</a>@endif</td>
                                             <td class="py-4 text-xs">{{ $payment->pagarme_order_id ?: '-' }}</td>
                                             <td class="py-4 text-xs">{{ $payment->pagarme_charge_id ?: '-' }}</td>
                                             <td class="py-4 text-xs">{{ $payment->pagarme_transaction_id ?: '-' }}</td>

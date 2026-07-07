@@ -19,6 +19,8 @@
         ];
         $canRetryPayment = in_array((string) $order->payment_status, ['pending', 'failed', 'expired'], true)
             && (string) $order->status !== 'cancelled';
+        $pagarmeCheckoutUrl = (string) $order->pagarme_checkout_url;
+        $canOpenPagarmeCheckout = str_starts_with($pagarmeCheckoutUrl, 'https://');
         $zipCode = preg_replace('/\D/', '', (string) $order->address?->zip_code);
         $formattedZipCode = strlen($zipCode) === 8 ? preg_replace('/(\d{5})(\d{3})/', '$1-$2', $zipCode) : $order->address?->zip_code;
     @endphp
@@ -41,8 +43,8 @@
                 @if ($canRetryPayment)
                     <div class="mt-5 flex flex-wrap gap-2 rounded-2xl bg-[#FFF3CD] p-4 text-sm font-semibold text-[#856404]">
                         <span>Pagamento ainda não confirmado.</span>
-                        @if ($order->pagarme_checkout_url)
-                            <a href="{{ $order->pagarme_checkout_url }}" class="underline" target="_blank">Abrir checkout</a>
+                        @if ($canOpenPagarmeCheckout)
+                            <a href="{{ $pagarmeCheckoutUrl }}" class="underline" target="_blank" rel="noopener noreferrer">Abrir checkout</a>
                         @endif
                         <form action="{{ route('checkout.payment.retry', $order) }}" method="POST">
                             @csrf
@@ -102,7 +104,7 @@
                             <div class="border-t pt-4 flex justify-between text-lg"><dt class="font-black">Total</dt><dd class="font-black text-[#185FA5]">R$ {{ number_format((float) $order->total_amount, 2, ',', '.') }}</dd></div>
                         </dl>
                         <div class="mt-5 space-y-1 text-sm text-[#3D3D3A]/75">
-                            <p><strong>Pagamento:</strong> {{ ucfirst((string) $order->payment_method) }}</p>
+                            <p><strong>Pagamento:</strong> {{ $order->paymentMethodLabel() }}</p>
                             <p><strong>Status:</strong> {{ $paymentStatusLabels[$order->payment_status] ?? ucfirst((string) $order->payment_status) }}</p>
                         </div>
                     </section>

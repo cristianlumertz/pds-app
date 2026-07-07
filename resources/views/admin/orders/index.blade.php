@@ -17,7 +17,7 @@
             'expired' => 'Expirado',
             'refunded' => 'Reembolsado',
         ];
-        $paymentMethods = ['pix' => 'PIX', 'cartao' => 'Cartão', 'boleto' => 'Boleto'];
+        $paymentMethods = ['pagarme_checkout' => 'Checkout Pagar.me', 'pix' => 'PIX', 'cartao' => 'Cartão', 'boleto' => 'Boleto'];
         $currentStatus = request('status', '');
     @endphp
 
@@ -102,7 +102,7 @@
                                     <td class="px-4 py-4 text-right text-sm text-[#1D9E75]">- R$ {{ number_format((float) $order->discount_amount, 2, ',', '.') }}</td>
                                     <td class="px-4 py-4 text-right text-sm">R$ {{ number_format((float) $order->shipping_amount, 2, ',', '.') }}</td>
                                     <td class="px-4 py-4 text-right text-sm font-black text-[#185FA5]">R$ {{ number_format((float) $order->total_amount, 2, ',', '.') }}</td>
-                                    <td class="px-4 py-4 text-sm font-semibold">{{ $paymentMethods[$order->payment_method] ?? ucfirst((string) $order->payment_method) }}</td>
+                                    <td class="px-4 py-4 text-sm font-semibold">{{ $order->paymentMethodLabel() }}</td>
                                     <td class="px-4 py-4 text-sm text-[#3D3D3A]/70">{{ $order->created_at?->format('d/m/Y H:i') }}</td>
                                     <td class="px-4 py-4 text-right">
                                         <a href="{{ route('admin.pedidos.show', $order) }}" class="inline-flex rounded-full bg-[#185FA5] px-4 py-2 text-sm font-bold text-white">Ver detalhes</a>

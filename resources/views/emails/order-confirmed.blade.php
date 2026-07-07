@@ -6,7 +6,7 @@ Seu pedido **#{{ $order->id }}** foi confirmado em **{{ $order->created_at->form
 @component('mail::panel')
 **Número do pedido:** #{{ $order->id }}  
 **Data:** {{ $order->created_at->format('d/m/Y H:i') }}  
-**Forma de pagamento:** {{ ucfirst($order->payment_method) }}  
+**Forma de pagamento:** {{ $order->paymentMethodLabel() }}  
 **Total geral:** R$ {{ number_format($order->total_amount, 2, ',', '.') }}
 @endcomponent
 
@@ -38,7 +38,7 @@ O QR Code PIX será disponibilizado no checkout hospedado da Pagar.me.
 @elseif ($order->payment_method === 'cartao')
 Os dados do cartão são informados somente no checkout hospedado da Pagar.me.
 @else
-Seu pagamento será processado pelo checkout hospedado da Pagar.me.
+Seu pagamento será processado pelo checkout hospedado da Pagar.me. Lá você poderá escolher Pix, boleto ou cartão.
 @endif
 
 Obrigado por comprar conosco.  

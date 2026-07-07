@@ -60,7 +60,7 @@ class CheckoutTest extends TestCase
             ->assertSessionHas('status', 'Seu carrinho está vazio.');
     }
 
-    public function test_step1_salva_address_id_na_sessao_e_redireciona_para_step2(): void
+    public function test_step1_salva_address_id_na_sessao_e_redireciona_para_revisao(): void
     {
         $user = User::factory()->create();
         $address = Address::factory()->create(['user_id' => $user->id]);
@@ -69,7 +69,7 @@ class CheckoutTest extends TestCase
             ->post(route('checkout.save-step1'), [
                 'address_id' => $address->id,
             ])
-            ->assertRedirect(route('checkout.step2'))
+            ->assertRedirect(route('checkout.step3'))
             ->assertSessionHas('checkout.address_id', $address->id);
     }
 
@@ -86,7 +86,7 @@ class CheckoutTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_step2_salva_payment_method_na_sessao_e_redireciona_para_step3(): void
+    public function test_rota_antiga_de_pagamento_redireciona_para_revisao_sem_salvar_metodo_local(): void
     {
         $user = User::factory()->create();
 
@@ -95,10 +95,10 @@ class CheckoutTest extends TestCase
                 'payment_method' => 'pix',
             ])
             ->assertRedirect(route('checkout.step3'))
-            ->assertSessionHas('checkout.payment_method', 'pix');
+            ->assertSessionMissing('checkout.payment_method');
     }
 
-    public function test_step2_nao_exibe_formulario_local_de_cartao(): void
+    public function test_rota_antiga_de_pagamento_redireciona_para_revisao(): void
     {
         $user = User::factory()->create();
         $address = Address::factory()->create(['user_id' => $user->id]);
@@ -107,8 +107,21 @@ class CheckoutTest extends TestCase
         $this->actingAs($user)
             ->withSession(['checkout.address_id' => $address->id])
             ->get(route('checkout.step2'))
+            ->assertRedirect(route('checkout.step3'));
+    }
+
+    public function test_revisao_nao_exibe_formulario_local_de_cartao(): void
+    {
+        $user = User::factory()->create();
+        $address = Address::factory()->create(['user_id' => $user->id]);
+        $this->createCartWithItem($user);
+
+        $this->actingAs($user)
+            ->withSession(['checkout.address_id' => $address->id])
+            ->get(route('checkout.step3'))
             ->assertOk()
             ->assertSee('Pagamento seguro pela Pagar.me')
+            ->assertSee('Lá você poderá escolher Pix, boleto ou cartão')
             ->assertDontSee('card_number')
             ->assertDontSee('card_holder')
             ->assertDontSee('card_expiry')
@@ -135,7 +148,6 @@ class CheckoutTest extends TestCase
         $this->actingAs($user)
             ->withSession([
                 'checkout.address_id' => $address->id,
-                'checkout.payment_method' => 'pix',
             ])
             ->post('/checkout/confirmar')
             ->assertRedirect('https://checkout.pagar.me/test/plink_checkout_test');
@@ -148,7 +160,7 @@ class CheckoutTest extends TestCase
         $this->assertSame($address->id, $order->address_id);
         $this->assertSame(Order::STATUS_PENDING, $order->status);
         $this->assertSame(Order::PAYMENT_STATUS_PENDING, $order->payment_status);
-        $this->assertSame('pix', $order->payment_method);
+        $this->assertSame(Order::PAYMENT_METHOD_PAGARME_CHECKOUT, $order->payment_method);
         $this->assertEquals(200.00, (float) $order->subtotal_amount);
         $this->assertEquals(0.00, (float) $order->discount_amount);
         $this->assertEquals(29.90, (float) $order->shipping_amount);
@@ -162,6 +174,7 @@ class CheckoutTest extends TestCase
         $this->assertEquals(100.00, (float) $orderItem->price);
 
         $this->assertNotNull($payment);
+        $this->assertSame(Order::PAYMENT_METHOD_PAGARME_CHECKOUT, $payment->payment_method);
         $this->assertSame(Payment::STATUS_PENDING, $payment->status);
         $this->assertEquals((float) $order->total_amount, (float) $payment->amount);
         $this->assertSame('plink_checkout_test', $order->pagarme_payment_link_id);
@@ -198,7 +211,6 @@ class CheckoutTest extends TestCase
         $this->actingAs($user)
             ->withSession([
                 'checkout.address_id' => $address->id,
-                'checkout.payment_method' => 'pix',
             ])
             ->post('/checkout/confirmar');
 
@@ -222,7 +234,6 @@ class CheckoutTest extends TestCase
         $this->actingAs($user)
             ->withSession([
                 'checkout.address_id' => $address->id,
-                'checkout.payment_method' => 'pix',
             ])
             ->post('/checkout/confirmar');
 
@@ -325,7 +336,6 @@ class CheckoutTest extends TestCase
         $this->actingAs($user)
             ->withSession([
                 'checkout.address_id' => $address->id,
-                'checkout.payment_method' => 'pix',
                 'checkout.coupon_code' => 'NAOEXISTE',
             ])
             ->post('/checkout/confirmar')
@@ -396,7 +406,6 @@ class CheckoutTest extends TestCase
         $this->actingAs($user)
             ->withSession([
                 'checkout.address_id' => $address->id,
-                'checkout.payment_method' => 'pix',
                 'checkout.coupon_code' => $couponCode,
             ])
             ->post('/checkout/confirmar')

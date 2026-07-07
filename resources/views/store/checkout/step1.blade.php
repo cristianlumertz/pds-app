@@ -31,7 +31,7 @@
                             2
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-bold text-[#3D3D3A]">Pagamento</p>
+                            <p class="text-sm font-bold text-[#3D3D3A]">Revisão</p>
                             <p class="text-xs text-[#3D3D3A]/60">Próximo</p>
                         </div>
                     </div>
@@ -43,8 +43,8 @@
                             3
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-bold text-[#3D3D3A]">Revisão</p>
-                            <p class="text-xs text-[#3D3D3A]/60">Finalização</p>
+                            <p class="text-sm font-bold text-[#3D3D3A]">Pagamento Pagar.me</p>
+                            <p class="text-xs text-[#3D3D3A]/60">Checkout seguro</p>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                                     type="submit"
                                     class="inline-flex items-center justify-center rounded-full bg-[#185FA5] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#144f8a] focus:outline-none focus:ring-2 focus:ring-[#185FA5] focus:ring-offset-2"
                                 >
-                                    Continuar para pagamento
+                                    Continuar para revisão
                                 </button>
                             </div>
                         </form>

@@ -103,31 +103,35 @@ class PagarmeService
         $successUrl = $this->resolveSuccessUrl($order);
         $hasDiscount = (float) $order->discount_amount > 0;
         $totalAmountInCents = $this->toCents((float) $order->total_amount);
+        $paymentSettings = [
+            'accepted_payment_methods' => $this->acceptedPaymentMethods(),
+            'pix_settings' => [
+                'expires_in' => 3600,
+            ],
+            'boleto_settings' => [
+                'due_in' => 3,
+                'instructions' => 'Pedido Construcerto. Pague até o vencimento.',
+            ],
+        ];
+
+        if (in_array('credit_card', $paymentSettings['accepted_payment_methods'], true)) {
+            $paymentSettings['credit_card_settings'] = [
+                'operation_type' => 'auth_and_capture',
+                'installments' => [
+                    [
+                        'number' => 1,
+                        'total' => $totalAmountInCents,
+                    ],
+                ],
+            ];
+        }
 
         $payload = [
             'name' => substr('Pedido #'.$order->id.' - Construcerto', 0, 64),
             'order_code' => (string) $order->id,
             'max_paid_sessions' => 1,
             'type' => 'order',
-            'payment_settings' => [
-                'accepted_payment_methods' => ['credit_card', 'pix', 'boleto'],
-                'credit_card_settings' => [
-                    'operation_type' => 'auth_and_capture',
-                    'installments' => [
-                        [
-                            'number' => 1,
-                            'total' => $totalAmountInCents,
-                        ],
-                    ],
-                ],
-                'pix_settings' => [
-                    'expires_in' => 3600,
-                ],
-                'boleto_settings' => [
-                    'due_in' => 3,
-                    'instructions' => 'Pedido Construcerto. Pague até o vencimento.',
-                ],
-            ],
+            'payment_settings' => $paymentSettings,
             'cart_settings' => [
                 'shipping_cost' => $hasDiscount ? 0 : $this->toCents((float) $order->shipping_amount),
                 'items' => $this->buildItems($order),
@@ -144,6 +148,20 @@ class PagarmeService
         }
 
         return $payload;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function acceptedPaymentMethods(): array
+    {
+        $methods = ['pix', 'boleto'];
+
+        if ((bool) config('services.pagarme.enable_credit_card', true)) {
+            array_unshift($methods, 'credit_card');
+        }
+
+        return $methods;
     }
 
     /**

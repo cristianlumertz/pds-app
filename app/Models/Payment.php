@@ -23,6 +23,8 @@ class Payment extends Model
 
     public const STATUS_REFUNDED = 'refunded';
 
+    public const METHOD_PAGARME_CHECKOUT = 'pagarme_checkout';
+
     /**
      * @var list<string>
      */
@@ -102,5 +104,17 @@ class Payment extends Model
     public function isRefunded(): bool
     {
         return (string) $this->status === self::STATUS_REFUNDED;
+    }
+
+    public function paymentMethodLabel(): string
+    {
+        return match ((string) $this->payment_method) {
+            self::METHOD_PAGARME_CHECKOUT => 'Checkout Pagar.me',
+            'hosted_checkout' => 'Checkout Pagar.me',
+            'pix' => 'PIX',
+            'boleto' => 'Boleto',
+            'cartao' => 'Cartão',
+            default => ucfirst((string) $this->payment_method),
+        };
     }
 }

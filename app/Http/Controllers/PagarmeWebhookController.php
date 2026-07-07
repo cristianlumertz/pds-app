@@ -189,7 +189,7 @@ class PagarmeWebhookController extends Controller
         }
 
         return $order->payments()->create(array_filter([
-            'payment_method' => $order->payment_method ?: 'pagarme',
+            'payment_method' => $order->payment_method ?: Order::PAYMENT_METHOD_PAGARME_CHECKOUT,
             'status' => $order->payment_status ?: Payment::STATUS_PENDING,
             'amount' => $order->total_amount,
             'pagarme_payment_link_id' => $this->idsFromPayload($payload)['payment_link_id'] ?? $order->pagarme_payment_link_id,

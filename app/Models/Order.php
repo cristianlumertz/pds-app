@@ -36,6 +36,8 @@ class Order extends Model
 
     public const PAYMENT_STATUS_CANCELED = 'canceled';
 
+    public const PAYMENT_METHOD_PAGARME_CHECKOUT = 'pagarme_checkout';
+
     /**
      * @var list<string>
      */
@@ -130,6 +132,18 @@ class Order extends Model
     public function isPaid(): bool
     {
         return (string) $this->payment_status === self::PAYMENT_STATUS_PAID;
+    }
+
+    public function paymentMethodLabel(): string
+    {
+        return match ((string) $this->payment_method) {
+            self::PAYMENT_METHOD_PAGARME_CHECKOUT => 'Checkout Pagar.me',
+            'hosted_checkout' => 'Checkout Pagar.me',
+            'pix' => 'PIX',
+            'boleto' => 'Boleto',
+            'cartao' => 'Cartão',
+            default => ucfirst((string) $this->payment_method),
+        };
     }
 
     public function markAsShipped(string $trackingNumber = ''): void

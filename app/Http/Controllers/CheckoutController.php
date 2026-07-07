@@ -67,39 +67,16 @@ class CheckoutController extends Controller
 
         session(['checkout.address_id' => $address->id]);
 
-        return redirect()->route('checkout.step2');
+        return redirect()->route('checkout.step3');
     }
 
-    public function step2(): View|RedirectResponse
+    public function step2(): RedirectResponse
     {
-        if (! session()->has('checkout.address_id')) {
-            return redirect()
-                ->route('checkout.step1')
-                ->with('status', 'Selecione um endereço para continuar.');
-        }
-
-        $cart = $this->getCart();
-
-        if (! $cart || $cart->isEmpty()) {
-            return redirect()
-                ->route('cart.index')
-                ->with('status', 'Seu carrinho está vazio.');
-        }
-
-        return view('store.checkout.step2', compact('cart'));
+        return redirect()->route('checkout.step3');
     }
 
-    public function saveStep2(Request $request): RedirectResponse
+    public function saveStep2(): RedirectResponse
     {
-        $validated = $request->validate([
-            'payment_method' => ['required', 'in:cartao,boleto,pix'],
-        ], [
-            'payment_method.required' => 'Selecione uma forma de pagamento.',
-            'payment_method.in' => 'Forma de pagamento inválida.',
-        ]);
-
-        session(['checkout.payment_method' => $validated['payment_method']]);
-
         return redirect()->route('checkout.step3');
     }
 
@@ -109,12 +86,6 @@ class CheckoutController extends Controller
             return redirect()
                 ->route('checkout.step1')
                 ->with('status', 'Selecione um endereço para continuar.');
-        }
-
-        if (! session()->has('checkout.payment_method')) {
-            return redirect()
-                ->route('checkout.step2')
-                ->with('status', 'Selecione uma forma de pagamento.');
         }
 
         $cart = $this->getCart();
@@ -150,12 +121,6 @@ class CheckoutController extends Controller
                 ->with('status', 'Selecione um endereço para continuar.');
         }
 
-        if (! session()->has('checkout.payment_method')) {
-            return redirect()
-                ->route('checkout.step2')
-                ->with('status', 'Selecione uma forma de pagamento.');
-        }
-
         $cart = $this->getCart();
 
         if (! $cart || $cart->isEmpty()) {
@@ -168,7 +133,7 @@ class CheckoutController extends Controller
             ->where('user_id', auth()->id())
             ->findOrFail(session('checkout.address_id'));
 
-        $paymentMethod = (string) session('checkout.payment_method');
+        $paymentMethod = Order::PAYMENT_METHOD_PAGARME_CHECKOUT;
         $couponCode = session('checkout.coupon_code');
         $user = $request->user();
 

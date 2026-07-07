@@ -46,7 +46,6 @@ class PagarmeCheckoutTest extends TestCase
         $response = $this->actingAs($user)
             ->withSession([
                 'checkout.address_id' => $address->id,
-                'checkout.payment_method' => 'pix',
             ])
             ->post('/checkout/confirmar');
 
@@ -56,6 +55,7 @@ class PagarmeCheckoutTest extends TestCase
 
         $this->assertSame(Order::STATUS_PENDING, $order->status);
         $this->assertSame(Order::PAYMENT_STATUS_PENDING, $order->payment_status);
+        $this->assertSame(Order::PAYMENT_METHOD_PAGARME_CHECKOUT, $order->payment_method);
         $this->assertSame('plink_test_123', $order->pagarme_payment_link_id);
         $this->assertSame('https://checkout.pagar.me/test/plink_test_123', $order->pagarme_checkout_url);
 
@@ -98,7 +98,6 @@ class PagarmeCheckoutTest extends TestCase
         $this->actingAs($user)
             ->withSession([
                 'checkout.address_id' => $address->id,
-                'checkout.payment_method' => 'pix',
             ])
             ->post('/checkout/confirmar')
             ->assertRedirect('https://checkout.pagar.me/test/plink_success_url_123');
@@ -107,6 +106,36 @@ class PagarmeCheckoutTest extends TestCase
 
         Http::assertSent(fn ($request): bool => $request['flow_settings']['success_url'] === 'https://checkout-return.example.com/pedido/'.$order->id.'/sucesso'
             && $request['payment_settings']['credit_card_settings']['installments'][0]['total'] === 27090
+        );
+    }
+
+    public function test_pagarme_payload_can_disable_credit_card_method(): void
+    {
+        Queue::fake();
+        $this->configurePagarme([
+            'services.pagarme.enable_credit_card' => false,
+        ]);
+
+        Http::fake([
+            'https://sdx-api.pagar.me/core/v5/paymentlinks' => Http::response([
+                'id' => 'plink_no_card_123',
+                'url' => 'https://checkout.pagar.me/test/plink_no_card_123',
+            ], 201),
+        ]);
+
+        [$user, $address] = $this->createCheckoutCart();
+
+        $this->actingAs($user)
+            ->withSession([
+                'checkout.address_id' => $address->id,
+            ])
+            ->post('/checkout/confirmar')
+            ->assertRedirect('https://checkout.pagar.me/test/plink_no_card_123');
+
+        Http::assertSent(fn ($request): bool => $request['payment_settings']['accepted_payment_methods'] === ['pix', 'boleto']
+            && ! isset($request['payment_settings']['credit_card_settings'])
+            && isset($request['payment_settings']['pix_settings'])
+            && isset($request['payment_settings']['boleto_settings'])
         );
     }
 
@@ -126,7 +155,6 @@ class PagarmeCheckoutTest extends TestCase
         $response = $this->actingAs($user)
             ->withSession([
                 'checkout.address_id' => $address->id,
-                'checkout.payment_method' => 'boleto',
             ])
             ->post('/checkout/confirmar');
 
@@ -172,7 +200,7 @@ class PagarmeCheckoutTest extends TestCase
             'address_id' => $address->id,
             'status' => Order::STATUS_PENDING,
             'payment_status' => Order::PAYMENT_STATUS_FAILED,
-            'payment_method' => 'pix',
+            'payment_method' => Order::PAYMENT_METHOD_PAGARME_CHECKOUT,
             'total_amount' => 99.90,
         ]);
         $product = Product::factory()->create([
@@ -189,7 +217,7 @@ class PagarmeCheckoutTest extends TestCase
             'price' => 99.90,
         ]);
         $payment = $order->payments()->create([
-            'payment_method' => 'pix',
+            'payment_method' => Order::PAYMENT_METHOD_PAGARME_CHECKOUT,
             'status' => Payment::STATUS_FAILED,
             'amount' => 99.90,
         ]);
@@ -266,6 +294,7 @@ class PagarmeCheckoutTest extends TestCase
             'services.pagarme.base_url' => 'https://sdx-api.pagar.me/core/v5',
             'services.pagarme.success_url' => null,
             'services.pagarme.cancel_url' => null,
+            'services.pagarme.enable_credit_card' => true,
         ], $overrides));
     }
 

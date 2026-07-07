@@ -6,6 +6,7 @@
             'boleto' => 'Seu pagamento será confirmado pela Pagar.me após a compensação do boleto.',
             'pix' => 'Seu pagamento será confirmado pela Pagar.me após a conclusão do PIX.',
             'cartao' => 'Seu pagamento será confirmado pela Pagar.me após a aprovação do cartão.',
+            'pagarme_checkout' => 'Seu pagamento será confirmado pela Pagar.me após a escolha e conclusão do método no checkout hospedado.',
         ];
 
         $instruction = $paymentInstructions[$order->payment_method] ?? 'Seu pedido está sendo processado.';
@@ -62,7 +63,7 @@
 
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-wide text-[#3D3D3A]/60">Forma de pagamento</p>
-                            <p class="mt-1 text-base font-bold text-[#3D3D3A]">{{ ucfirst($order->payment_method) }}</p>
+                            <p class="mt-1 text-base font-bold text-[#3D3D3A]">{{ $order->paymentMethodLabel() }}</p>
                         </div>
 
                         <div>

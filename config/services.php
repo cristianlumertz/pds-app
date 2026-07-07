@@ -34,6 +34,7 @@ return [
         'success_url' => env('PAGARME_SUCCESS_URL'),
         'cancel_url' => env('PAGARME_CANCEL_URL'),
         'webhook_secret' => env('PAGARME_WEBHOOK_SECRET'),
+        'enable_credit_card' => env('PAGARME_ENABLE_CREDIT_CARD', true),
     ],
 
     'slack' => [

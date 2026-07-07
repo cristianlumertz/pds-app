@@ -45,8 +45,8 @@
                         </div>
 
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-[#3D3D3A]/60">Preferência escolhida</p>
-                            <p class="mt-1 text-base font-bold text-[#3D3D3A]">{{ ucfirst($order->payment_method) }}</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-[#3D3D3A]/60">Pagamento</p>
+                            <p class="mt-1 text-base font-bold text-[#3D3D3A]">{{ $order->paymentMethodLabel() }}</p>
                         </div>
 
                         <div>

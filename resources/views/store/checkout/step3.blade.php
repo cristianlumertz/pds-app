@@ -15,13 +15,6 @@
         $shipping = (float) $summary['shipping_amount'];
         $total = (float) $summary['total_amount'];
         $couponCode = $summary['coupon_code'] ?? null;
-        $paymentMethod = session('checkout.payment_method');
-        $paymentLabels = [
-            'cartao' => ['label' => 'Cartão', 'icon' => '💳'],
-            'boleto' => ['label' => 'Boleto', 'icon' => '▯'],
-            'pix' => ['label' => 'PIX', 'icon' => '◆'],
-        ];
-        $payment = $paymentLabels[$paymentMethod] ?? ['label' => 'Pagamento', 'icon' => '•'];
         $formattedZipCode = preg_replace('/(\d{5})(\d{3})/', '$1-$2', preg_replace('/\D/', '', (string) $address->zip_code));
     @endphp
 
@@ -30,8 +23,8 @@
             <div class="mb-10 rounded-3xl bg-white p-6 shadow-sm">
                 <div class="flex items-center">
                     <div class="flex flex-1 items-center">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#1D9E75] text-sm font-bold text-white">
-                            ✓
+                        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#185FA5] text-sm font-bold text-white">
+                            2
                         </div>
                         <div class="ml-3">
                             <p class="text-sm font-bold text-[#1D9E75]">Endereço</p>
@@ -46,20 +39,20 @@
                             ✓
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-bold text-[#1D9E75]">Pagamento</p>
-                            <p class="text-xs text-[#3D3D3A]/60">Concluído</p>
+                            <p class="text-sm font-bold text-[#185FA5]">Revisão</p>
+                            <p class="text-xs text-[#3D3D3A]/60">Ativo</p>
                         </div>
                     </div>
 
-                    <div class="mx-4 h-1 flex-1 rounded-full bg-[#185FA5]"></div>
+                    <div class="mx-4 h-1 flex-1 rounded-full bg-[#3D3D3A]/15"></div>
 
                     <div class="flex flex-1 items-center">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#185FA5] text-sm font-bold text-white">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-full border border-[#3D3D3A]/20 bg-white text-sm font-bold text-[#3D3D3A]/60">
                             3
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-bold text-[#185FA5]">Revisão</p>
-                            <p class="text-xs text-[#3D3D3A]/60">Ativo</p>
+                            <p class="text-sm font-bold text-[#3D3D3A]">Pagamento Pagar.me</p>
+                            <p class="text-xs text-[#3D3D3A]/60">Checkout seguro</p>
                         </div>
                     </div>
                 </div>
@@ -97,23 +90,14 @@
                         </div>
                     </section>
 
-                    <section class="rounded-3xl bg-white p-6 shadow-sm">
-                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <h2 class="text-2xl font-bold text-[#3D3D3A]">Preferência de pagamento</h2>
-                                <span class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#185FA5]/10 px-4 py-2 text-sm font-bold text-[#185FA5]">
-                                    <span>{{ $payment['icon'] }}</span>
-                                    {{ $payment['label'] }}
-                                </span>
-                            </div>
-
-                            <a
-                                href="{{ route('checkout.step2') }}"
-                                class="inline-flex items-center justify-center rounded-full border border-[#185FA5] px-4 py-2 text-sm font-bold text-[#185FA5] transition hover:bg-[#185FA5] hover:text-white"
-                            >
-                                Alterar
-                            </a>
-                        </div>
+                    <section class="rounded-3xl border border-[#185FA5]/15 bg-[#185FA5]/10 p-6 shadow-sm">
+                        <h2 class="text-xl font-black text-[#185FA5]">Pagamento seguro pela Pagar.me</h2>
+                        <p class="mt-2 text-sm font-semibold text-[#3D3D3A]/75">
+                            O pagamento será realizado no checkout seguro da Pagar.me. Lá você poderá escolher Pix, boleto ou cartão.
+                        </p>
+                        <p class="mt-3 text-sm text-[#3D3D3A]/70">
+                            Nenhum dado de cartão é coletado pela Construcerto.
+                        </p>
                     </section>
 
                     <section class="rounded-3xl bg-white p-6 shadow-sm">
@@ -240,7 +224,7 @@
                                     type="submit"
                                     class="inline-flex w-full items-center justify-center rounded-full bg-[#1D9E75] px-6 py-4 text-base font-bold text-white shadow-sm transition hover:bg-[#168463] focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:ring-offset-2"
                                 >
-                                    Ir para pagamento na Pagar.me
+                                    Confirmar pedido e ir para pagamento
                                 </button>
 
                                 <p class="mt-3 text-center text-xs text-[#3D3D3A]/60">
