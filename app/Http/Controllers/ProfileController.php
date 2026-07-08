@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +17,29 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $defaultAddress = $user->addresses()
+            ->where('is_default', true)
+            ->first();
+
+        $latestOrders = $user->orders()
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $profileStats = [
+            'orders_count' => $user->orders()->count(),
+            'addresses_count' => $user->addresses()->count(),
+            'total_spent' => $user->orders()
+                ->where('payment_status', Order::PAYMENT_STATUS_PAID)
+                ->sum('total_amount'),
+        ];
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'defaultAddress' => $defaultAddress,
+            'latestOrders' => $latestOrders,
+            'profileStats' => $profileStats,
         ]);
     }
 
@@ -26,7 +48,10 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validated();
+        $validated['newsletter_opt_in'] = $request->boolean('newsletter_opt_in');
+
+        $request->user()->fill($validated);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;

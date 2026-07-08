@@ -23,7 +23,7 @@
             $logoAsset = file_exists(public_path('images/logo-construcerto.png'))
                 ? 'images/logo-construcerto.png'
                 : (file_exists(public_path('images/logo.jpeg')) ? 'images/logo.jpeg' : null);
-            $trackingRoute = auth()->check() ? route('orders.index') : route('login');
+            $ordersRoute = auth()->check() ? route('orders.index') : route('login');
             $categoryLinks = [
                 ['label' => 'Ferramentas', 'slug' => 'ferramentas'],
                 ['label' => 'Elétrica', 'slug' => 'eletrica'],
@@ -42,10 +42,7 @@
                         Atendimento: (51) 9999-9999
                     </a>
 
-                    <nav class="flex items-center gap-5" aria-label="Links de atendimento">
-                        <a href="{{ $trackingRoute }}" class="hover:underline">Rastrear pedido</a>
-                        <a href="mailto:atendimento@construcerto.com.br" class="hidden hover:underline sm:inline">Ajuda</a>
-                    </nav>
+                    <p class="hidden font-semibold sm:block">Entrega em Capão da Canoa/RS</p>
                 </div>
             </div>
 
@@ -94,12 +91,12 @@
                         <livewire:cart-icon />
 
                         @auth
-                            <a href="{{ route('user.dashboard') }}" class="inline-flex items-center gap-2 rounded px-2 py-2 text-sm font-semibold text-white transition hover:bg-white/10">
+                            <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-2 rounded px-2 py-2 text-sm font-semibold text-white transition hover:bg-white/10">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
                                     <path d="M20 21a8 8 0 0 0-16 0"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
-                                Minha conta
+                                Meu perfil
                             </a>
 
                             @if (auth()->user()->is_admin)
@@ -300,8 +297,8 @@
                     <div class="mt-5 border-t border-white/15 pt-5">
                         @auth
                             <div class="grid gap-2">
-                                <a href="{{ route('user.dashboard') }}" class="rounded px-3 py-2.5 text-sm font-semibold text-white hover:bg-white/10" x-on:click="open = false">
-                                    Minha conta
+                                <a href="{{ route('profile.edit') }}" class="rounded px-3 py-2.5 text-sm font-semibold text-white hover:bg-white/10" x-on:click="open = false">
+                                    Meu perfil
                                 </a>
 
                                 <a href="{{ route('orders.index') }}" class="rounded px-3 py-2.5 text-sm font-semibold text-white hover:bg-white/10" x-on:click="open = false">
@@ -415,10 +412,7 @@
                         <h2 class="text-base font-bold text-white">Atendimento</h2>
                         <ul class="mt-4 space-y-2.5 text-sm text-white/80">
                             <li>
-                                <a href="{{ $trackingRoute }}" class="transition hover:text-white hover:underline">Meus Pedidos</a>
-                            </li>
-                            <li>
-                                <a href="{{ $trackingRoute }}" class="transition hover:text-white hover:underline">Rastrear Pedido</a>
+                                <a href="{{ $ordersRoute }}" class="transition hover:text-white hover:underline">Meus Pedidos</a>
                             </li>
                             <li>
                                 <a href="{{ route('store.home') }}#politica-de-troca" class="transition hover:text-white hover:underline">Política de Troca</a>

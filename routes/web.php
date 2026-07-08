@@ -5,7 +5,10 @@ use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminCouponController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminReportController;
+use App\Http\Controllers\Admin\AdminStockController;
 use App\Http\Controllers\Admin\AdminStockMovementController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\CartController;
@@ -80,7 +83,12 @@ Route::prefix('admin')
         Route::resource('products', AdminProductController::class)->except('show');
         Route::resource('coupons', AdminCouponController::class)->except('show');
         Route::resource('users', AdminUserController::class)->only(['index', 'show', 'edit', 'update']);
+        Route::get('pagamentos', [AdminPaymentController::class, 'index'])->name('payments.index');
+        Route::get('pagamentos/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
+        Route::get('estoque', [AdminStockController::class, 'index'])->name('stock.index');
+        Route::post('estoque/{product}/ajustar', [AdminStockController::class, 'update'])->name('stock.update');
         Route::get('estoque/movimentacoes', [AdminStockMovementController::class, 'index'])->name('stock-movements.index');
+        Route::get('relatorios', AdminReportController::class)->name('reports.index');
         Route::resource('pedidos', AdminOrderController::class)
             ->parameters(['pedidos' => 'order'])
             ->only(['index', 'show', 'update']);

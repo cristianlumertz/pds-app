@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
     <section class="mx-auto w-full max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -61,9 +61,13 @@
                 @enderror
             </div>
 
-            <div class="md:col-span-2">
+            <div class="md:col-span-2" x-data="{ imageUrl: @js(old('image_url', $product->image_url)) }">
                 <label for="image_url" class="text-sm font-semibold text-slate-700">URL da imagem</label>
-                <input id="image_url" name="image_url" type="url" value="{{ old('image_url', $product->image_url) }}" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-amber-200 transition focus:ring-2">
+                <input id="image_url" name="image_url" type="url" value="{{ old('image_url', $product->image_url) }}" x-model="imageUrl" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-amber-200 transition focus:ring-2">
+                <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3" x-show="imageUrl" x-cloak>
+                    <p class="mb-2 text-xs font-semibold uppercase text-slate-500">Pré-visualização</p>
+                    <img x-bind:src="imageUrl" alt="Pré-visualização da imagem principal" class="h-36 w-full rounded-lg bg-white object-contain">
+                </div>
                 @error('image_url')
                     <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
                 @enderror

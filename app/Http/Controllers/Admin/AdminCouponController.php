@@ -11,14 +11,27 @@ use Illuminate\Validation\Rule;
 
 class AdminCouponController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $coupons = Coupon::query()
             ->withCount('orders')
+            ->when($request->filled('q'), function ($query) use ($request): void {
+                $search = trim((string) $request->query('q'));
+
+                $query
+                    ->where('code', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            })
+            ->when($request->query('discount_type'), fn ($query, string $type) => $query->where('discount_type', $type))
+            ->when($request->query('status') === 'active', fn ($query) => $query->where('is_active', true))
+            ->when($request->query('status') === 'inactive', fn ($query) => $query->where('is_active', false))
             ->latest()
             ->paginate(15);
 
-        return view('admin.coupons.index', compact('coupons'));
+        return view('admin.coupons.index', [
+            'coupons' => $coupons,
+            'discountTypes' => $this->discountTypes(),
+        ]);
     }
 
     public function create(): View

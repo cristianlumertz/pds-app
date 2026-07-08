@@ -12,11 +12,24 @@ use Illuminate\Validation\Rule;
 
 class AdminCategoryController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $categories = Category::query()
             ->with('parent')
             ->withCount(['products', 'children'])
+            ->when($request->filled('q'), function ($query) use ($request): void {
+                $search = trim((string) $request->query('q'));
+
+                $query->where(function ($builder) use ($search): void {
+                    $builder
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->query('status') === 'active', fn ($query) => $query->where('is_active', true))
+            ->when($request->query('status') === 'inactive', fn ($query) => $query->where('is_active', false))
+            ->when($request->query('parent') === 'root', fn ($query) => $query->whereNull('parent_id'))
+            ->when($request->query('parent') === 'child', fn ($query) => $query->whereNotNull('parent_id'))
             ->latest()
             ->paginate(12);
 

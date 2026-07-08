@@ -42,6 +42,8 @@ class AdminUserController extends Controller
             ->when($request->query('status'), fn ($query, string $status) => $query->where('status', $status))
             ->when($request->query('role') === 'admin', fn ($query) => $query->where('is_admin', true))
             ->when($request->query('role') === 'customer', fn ($query) => $query->where('is_admin', false))
+            ->when($request->query('verified') === 'yes', fn ($query) => $query->whereNotNull('email_verified_at'))
+            ->when($request->query('verified') === 'no', fn ($query) => $query->whereNull('email_verified_at'))
             ->latest()
             ->paginate(15);
 

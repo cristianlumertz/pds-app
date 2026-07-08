@@ -23,14 +23,34 @@ class AdminProductController extends Controller
     ) {
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $products = Product::query()
-            ->with('category')
+            ->with(['category', 'productImages'])
+            ->when($request->filled('q'), function ($query) use ($request): void {
+                $search = trim((string) $request->query('q'));
+
+                $query->where(function ($builder) use ($search): void {
+                    $builder
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->integer('category_id'), fn ($query, int $categoryId) => $query->where('category_id', $categoryId))
+            ->when($request->query('status') === 'active', fn ($query) => $query->where('is_active', true))
+            ->when($request->query('status') === 'inactive', fn ($query) => $query->where('is_active', false))
+            ->when($request->query('stock') === 'low', fn ($query) => $query->whereBetween('stock', [1, 5]))
+            ->when($request->query('stock') === 'out', fn ($query) => $query->where('stock', 0))
+            ->when($request->filled('min_price'), fn ($query) => $query->where('price', '>=', (float) $request->query('min_price')))
+            ->when($request->filled('max_price'), fn ($query) => $query->where('price', '<=', (float) $request->query('max_price')))
             ->latest()
             ->paginate(12);
 
-        return view('admin.products.index', compact('products'));
+        $categories = Category::query()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('admin.products.index', compact('products', 'categories'));
     }
 
     public function create(): View

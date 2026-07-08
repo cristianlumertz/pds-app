@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\StockMovement;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -15,6 +16,8 @@ class AdminStockMovementController extends Controller
         $movements = StockMovement::query()
             ->with(['product', 'user', 'order'])
             ->when($request->integer('product_id'), fn ($query, int $productId) => $query->where('product_id', $productId))
+            ->when($request->integer('user_id'), fn ($query, int $userId) => $query->where('user_id', $userId))
+            ->when($request->integer('order_id'), fn ($query, int $orderId) => $query->where('order_id', $orderId))
             ->when($request->query('type'), fn ($query, string $type) => $query->where('type', $type))
             ->when($request->date('from'), fn ($query, $date) => $query->whereDate('created_at', '>=', $date))
             ->when($request->date('to'), fn ($query, $date) => $query->whereDate('created_at', '<=', $date))
@@ -25,6 +28,10 @@ class AdminStockMovementController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'sku']);
 
+        $users = User::query()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         $types = [
             StockMovement::TYPE_ENTRY => 'Entrada',
             StockMovement::TYPE_EXIT => 'Saída',
@@ -34,6 +41,6 @@ class AdminStockMovementController extends Controller
             StockMovement::TYPE_RESERVATION_RELEASE => 'Liberação de reserva',
         ];
 
-        return view('admin.stock-movements.index', compact('movements', 'products', 'types'));
+        return view('admin.stock-movements.index', compact('movements', 'products', 'users', 'types'));
     }
 }

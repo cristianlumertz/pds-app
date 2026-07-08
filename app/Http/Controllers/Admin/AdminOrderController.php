@@ -30,6 +30,20 @@ class AdminOrderController extends Controller
             ->when($request->query('payment_method'), function ($query, string $method) {
                 $query->where('payment_method', $method);
             })
+            ->when($request->filled('customer'), function ($query) use ($request): void {
+                $search = trim((string) $request->query('customer'));
+
+                $query->whereHas('user', function ($builder) use ($search): void {
+                    $builder
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('cpf', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->date('from'), fn ($query, $date) => $query->whereDate('created_at', '>=', $date))
+            ->when($request->date('to'), fn ($query, $date) => $query->whereDate('created_at', '<=', $date))
+            ->when($request->filled('min_total'), fn ($query) => $query->where('total_amount', '>=', (float) $request->query('min_total')))
+            ->when($request->filled('max_total'), fn ($query) => $query->where('total_amount', '<=', (float) $request->query('max_total')))
             ->latest()
             ->paginate(15);
 
